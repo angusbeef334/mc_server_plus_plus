@@ -1,0 +1,4 @@
+[main/ERROR] [mixin/]: Mixin config gamemenuremovegfarb-common.mixins.json does not specify "minVersion" property
+[Server thread/WARN] [net.minecraft.server.level.ServerLevel/]: Tried to add entity minecraft:spider but it was marked as removed already
+[Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving players
+[Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (world): All chunks are saved
