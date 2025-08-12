@@ -94,7 +94,7 @@ export async function downloadURL(name: string, version: string, location: strin
   try {
     const res = await fetch(location, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; mc_server_plus_plus/1.0)'
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36'
       }
     });
     if (!res.ok) {
