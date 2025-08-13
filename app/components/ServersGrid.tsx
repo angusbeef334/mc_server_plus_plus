@@ -10,7 +10,7 @@ export function ServersGrid() {
   useEffect(() => {
     const fetchServers = async () => {
       try {
-        const res = await fetch('/api/data/servers');
+        const res = await fetch('/api/servers');
         const data = await res.json();
         setServers(data);
       } catch (err) {

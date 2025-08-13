@@ -26,7 +26,7 @@ export function getAllServers(): Server[] {
   }
 }
 
-export function getServerByName(name: string): Server | null {
+export function getServer(name: string): Server | null {
   const servers = getAllServers();
   return servers.find(server => server.name === name) || null;
 }

@@ -17,7 +17,7 @@ export default function ServerPage() {
   useEffect(() => {
     const getServers = async () => {
       try {
-        const res = await fetch('/api/data/servers')
+        const res = await fetch('/api/servers')
         const data = await res.json()
         setServer(data.find((s: Server) => s.name === serverName) || null)
       } catch (err) {
