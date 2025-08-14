@@ -40,18 +40,30 @@ export async function downloadSpigot(name: string, version: string, id: string, 
 
       const dataPath = path.join(process.cwd(), 'data', 'servers.json');
       if (fs.existsSync(dataPath)) {
-        const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
-        
-        if (Array.isArray(data)) {
-          const i = data.findIndex(s => s.plugins.some((p: { name: string }) => p.name === name));
-          if (i !== -1) {
-            const j = data[i].plugins.findIndex((p: { name: string }) => p.name === name);
-            if (j !== -1) {
-              data[i].plugins[j].version = version;
-              fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+        try {
+          const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
+
+          if (Array.isArray(data)) {
+            const i = data.findIndex(server => server.plugins.some((plugin: { name: string }) => plugin.name === name));
+            if (i !== -1) {
+              const j = data[i].plugins.findIndex((plugin: { name: string }) => plugin.name === name);
+              if (j !== -1) {
+                data[i].plugins[j].version = version;
+                fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+              } else {
+                console.error(`Plugin ${name} not found in server plugins.`);
+              }
+            } else {
+              console.error(`Server containing plugin ${name} not found.`);
             }
+          } else {
+            console.error(`Invalid data format in ${dataPath}. Expected an array.`);
           }
+        } catch (error) {
+          console.error(`Error reading or parsing ${dataPath}:`, error);
         }
+      } else {
+        console.error(`File ${dataPath} does not exist.`);
       }
     } else {
       console.log(`no new version of ${name}, aborting`);
@@ -110,18 +122,30 @@ export async function downloadGithub(name: string, version: string, repo: string
 
       const dataPath = path.join(process.cwd(), 'data', 'servers.json');
       if (fs.existsSync(dataPath)) {
-        const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
+        try {
+          const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
 
-        if (Array.isArray(data)) {
-          const i = data.findIndex(s => s.plugins.some((p: { name: string }) => p.name === name));
-          if (i !== -1) {
-            const j = data[i].plugins.findIndex((p: { name: string }) => p.name === name);
-            if (j !== -1) {
-              data[i].plugins[j].version = version;
-              fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+          if (Array.isArray(data)) {
+            const i = data.findIndex(server => server.plugins.some((plugin: { name: string }) => plugin.name === name));
+            if (i !== -1) {
+              const j = data[i].plugins.findIndex((plugin: { name: string }) => plugin.name === name);
+              if (j !== -1) {
+                data[i].plugins[j].version = version;
+                fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+              } else {
+                console.error(`Plugin ${name} not found in server plugins.`);
+              }
+            } else {
+              console.error(`Server containing plugin ${name} not found.`);
             }
+          } else {
+            console.error(`Invalid data format in ${dataPath}. Expected an array.`);
           }
+        } catch (error) {
+          console.error(`Error reading or parsing ${dataPath}:`, error);
         }
+      } else {
+        console.error(`File ${dataPath} does not exist.`);
       }
     } else {
       console.log(`no new version of ${name}, aborting`);
