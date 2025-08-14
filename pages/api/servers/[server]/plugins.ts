@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { downloadSpigot, downloadGithub, downloadURL } from "@/lib/downloader";
 import path from "path";
+import fs from 'fs'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "PUT") {
@@ -50,16 +51,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const location = `${server.location}/plugins/${plugin}.jar`;
+    const dataPath = path.join(process.cwd(), 'data', 'servers.json');
+
     try {
-      const fs = require("fs");
       if (fs.existsSync(location)) {
         fs.unlinkSync(location);
-        res.status(200).json({ message: "Plugin deleted successfully" });
       } else {
         res.status(404).json({ error: "Plugin not found" });
+        return;
       }
+
+      if (fs.existsSync(dataPath)) {
+        const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
+
+        if (Array.isArray(data)) {
+          const i = data.findIndex(s => s.name === server.name);
+
+          if (i !== -1 && Array.isArray(data[i].plugins)) {
+            data[i].plugins = data[i].plugins.filter((p: { name: string }) => p.name !== plugin);
+            fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+          }
+        }
+      }
+
+      res.status(200).json({ message: "Successfully deleted plugin" });
     } catch (err) {
-      res.status(500).json({ error: "Failed to delete plugin", details: String(err) });
+      res.status(500).json({ error: "Failed to delete plugin and/or data", details: String(err) });
     }
   } else {
     res.status(405).json({ error: "Invalid method" });

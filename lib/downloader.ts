@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 
 export interface Plugin {
   name: string;
@@ -36,6 +37,21 @@ export async function downloadSpigot(name: string, version: string, id: string, 
 
     if (json.version.id > version) {
       version = json.version.id;
+
+      const dataPath = path.join(process.cwd(), 'data', 'servers.json');
+      if (fs.existsSync(dataPath)) {
+        const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
+        if (Array.isArray(data)) {
+          const i = data.findIndex(s => s.plugins.some((p: { name: string }) => p.name === name));
+          if (i !== -1) {
+            const j = data[i].plugins.findIndex((p: { name: string }) => p.name === name);
+            if (j !== -1) {
+              data[i].plugins[j].version = version;
+              fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+            }
+          }
+        }
+      }
     } else {
       console.log(`no new version of ${name}, aborting`);
       return false;
@@ -104,7 +120,6 @@ export async function downloadURL(name: string, version: string, location: strin
 
     const data = await res.arrayBuffer();
 
-    const path = require('path');
     const dir = path.dirname(output);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
