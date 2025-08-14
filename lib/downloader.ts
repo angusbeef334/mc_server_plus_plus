@@ -12,9 +12,9 @@ export interface Plugin {
  * @param name name of the plugin
  * @param version old version of the plugin
  * @param id spigotmc plugin id
- * @returns boolean: true if successful download, else false
+ * @returns string: new/current version if download successful/no new ver, empty if download failed
  */
-export async function downloadSpigot(name: string, version: string, id: string, output: string): Promise<boolean> {
+export async function downloadSpigot(name: string, version: string, id: string, output: string): Promise<string> {
   const url = `https://api.spiget.org/v2/resources/${id}`;
   
   try {
@@ -26,13 +26,13 @@ export async function downloadSpigot(name: string, version: string, id: string, 
     });
     if (!res.ok) {
       console.error(`failed to get plugin information: ${res.statusText || 'unknown error'}`);
-      return false;
+      return '';
     }
 
     const json = await res.json();
     if (json.external) {
       console.error(`plugin ${name} is external, try ${json.file.externalUrl}`);
-      return false;
+      return '';
     }
 
     if (json.version.id > version) {
@@ -41,6 +41,7 @@ export async function downloadSpigot(name: string, version: string, id: string, 
       const dataPath = path.join(process.cwd(), 'data', 'servers.json');
       if (fs.existsSync(dataPath)) {
         const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
+        
         if (Array.isArray(data)) {
           const i = data.findIndex(s => s.plugins.some((p: { name: string }) => p.name === name));
           if (i !== -1) {
@@ -54,18 +55,21 @@ export async function downloadSpigot(name: string, version: string, id: string, 
       }
     } else {
       console.log(`no new version of ${name}, aborting`);
-      return false;
+      return version;
+    }
+
+    try {
+      return (
+        (await downloadURL(name, version, `${url}/download?version=${version}`, output))?
+        json.version.id : version
+      )
+    } catch (err) {
+      console.error(`failed to download plugin ${name}: ${err || 'unknown error'}`);
+      return '';
     }
   } catch (err) {
     console.error(`failed to get plugin information: ${err || 'unknown error'}`);
-    return false;
-  }
-
-  try {    
-    return await downloadURL(name, version, `${url}/download?version=${version}`, output);
-  } catch (err) {
-    console.error(`failed to download plugin ${name}: ${err || 'unknown error'}`);
-    return false;
+    return '';
   }
 }
 
@@ -90,6 +94,39 @@ export async function downloadGithub(name: string, version: string, repo: string
     const data = await res.json();
     const newVersion = data.tag_name;
     const url = data.assets[0].browser_download_url;
+
+    const semverCompare = (a: string, b: string) => {
+      const pa = a.split('.').map(Number);
+      const pb = b.split('.').map(Number);
+      for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+        const diff = (pa[i] || 0) - (pb[i] || 0);
+        if (diff !== 0) return diff;
+      }
+      return 0;
+    };
+
+    if (semverCompare(newVersion, version) > 0) {
+      version = newVersion;
+
+      const dataPath = path.join(process.cwd(), 'data', 'servers.json');
+      if (fs.existsSync(dataPath)) {
+        const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
+
+        if (Array.isArray(data)) {
+          const i = data.findIndex(s => s.plugins.some((p: { name: string }) => p.name === name));
+          if (i !== -1) {
+            const j = data[i].plugins.findIndex((p: { name: string }) => p.name === name);
+            if (j !== -1) {
+              data[i].plugins[j].version = version;
+              fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+            }
+          }
+        }
+      }
+    } else {
+      console.log(`no new version of ${name}, aborting`);
+      return version;
+    }
 
     const res1 = await downloadURL(name, version, url, output);
 

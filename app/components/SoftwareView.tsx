@@ -29,7 +29,10 @@ export default function SoftwareView({server}: SoftwareViewProps) {
         throw new Error(data.error || 'unknown error');
       }
 
-      setPluginStatus(plugin.name, { msg: 'successful update', updating: false });
+      const { version } = await res.json();
+
+      setPluginStatus(plugin.name, { msg: (version !== plugin.version) ? 'successful update' : 'no new version', updating: false });
+      plugin.version = version;
     } catch (e: any) {
       setPluginStatus(plugin.name, { err: e?.message || String(e), updating: false });
     }

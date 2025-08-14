@@ -20,7 +20,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       switch (plugin.source) {
         case "spigot":
-          success = await downloadSpigot(plugin.name, plugin.version, plugin.location, output);
+          version = await downloadSpigot(plugin.name, plugin.version, plugin.location, output);
+          success = !!version;
           break;
         case "github":
           version = await downloadGithub(plugin.name, plugin.version, plugin.location, output);
