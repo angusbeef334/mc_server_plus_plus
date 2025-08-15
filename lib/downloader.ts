@@ -18,7 +18,6 @@ export async function downloadSpigot(name: string, version: string, id: string, 
   const url = `https://api.spiget.org/v2/resources/${id}`;
   
   try {
-    console.log(url)
     const res = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36'
@@ -72,7 +71,7 @@ export async function downloadSpigot(name: string, version: string, id: string, 
 
     try {
       return (
-        (await downloadURL(name, version, `${url}/download?version=${version}`, output))?
+        (await downloadURL(name, `${url}/download?version=${version}`, output))?
         json.version.id : version
       )
     } catch (err) {
@@ -133,30 +132,95 @@ export async function downloadGithub(name: string, version: string, repo: string
                 data[i].plugins[j].version = version;
                 fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
               } else {
-                console.error(`Plugin ${name} not found in server plugins.`);
+                console.error(`plugin does not exist: ${name}`);
               }
             } else {
-              console.error(`Server containing plugin ${name} not found.`);
+              console.error('server not found');
             }
           } else {
-            console.error(`Invalid data format in ${dataPath}. Expected an array.`);
+            console.error('invalid data format');
           }
         } catch (error) {
-          console.error(`Error reading or parsing ${dataPath}:`, error);
+          console.error(`failed to read or parse ${dataPath}`);
         }
       } else {
-        console.error(`File ${dataPath} does not exist.`);
+        console.error(`file ${dataPath} does not exist`);
       }
     } else {
       console.log(`no new version of ${name}, aborting`);
       return version;
     }
 
-    const res1 = await downloadURL(name, version, url, output);
+    const res1 = await downloadURL(name, url, output);
 
     return res1? newVersion : '';
   } catch (err) {
     console.error(`failed to download plugin ${name}: ${err || 'unknown error'}`);
+    return '';
+  }
+}
+
+/**
+ * @param paperVer current build of paper
+ * @param mcVer current version of mc
+ * @param output 
+ * @returns 
+ */
+export async function downloadPaper(paperVer: string, mcVer: string, output: string): Promise<string> {
+  const location = `https://fill.papermc.io/v3/projects/paper/versions/${mcVer}/builds`
+  try {
+    const res = await fetch(location);
+    
+    if (!res.ok) {
+      console.error(`failed to get paper versions data: ${res.statusText || 'unknown error'}`);
+      return '';
+    }
+
+    const data = await res.json();
+    const build = data[0].id;
+    if (paperVer.toString() === build.toString()) {
+      console.log(`no new version of paper, aborting`);
+      return paperVer;
+    }
+
+    const res1 = await fetch(`${location}/${build}`);
+
+    if (!res1.ok) {
+      console.error(`failed to get paper builds data: ${res1.statusText || 'unknown error'}`);
+      return '';
+    }
+
+    const data1 = await res1.json();
+    const url = data1['downloads']['server:default']['url'];
+
+    const res2 = await downloadURL('server', url, output);
+    if (res2) {
+      const servers = path.join(process.cwd(), 'data', 'servers.json');
+      if (fs.existsSync(servers)) {
+        try {
+          const data = JSON.parse(fs.readFileSync(servers, "utf-8"));
+
+          if (Array.isArray(data)) {
+            const serverIndex = data.findIndex(server => server.software === 'paper' && server.version === mcVer);
+            if (serverIndex !== -1) {
+              data[serverIndex].build = build.toString();
+              fs.writeFileSync(servers, JSON.stringify(data, null, 2), "utf-8");
+            } else {
+              console.error('server not found');
+            }
+          } else {
+            console.error(`invalid servers.json file`);
+          }
+        } catch (error) {
+          console.error(`failed to get data: ${error || 'unknown error'}`);
+        }
+      } else {
+        console.error(`servers.json does not exist`);
+      }
+    }
+    return res2? build : '';
+  } catch (err) {
+    console.error(`failed to download paper: ${err || 'unknown error'}`);
     return '';
   }
 }
@@ -167,7 +231,7 @@ export async function downloadGithub(name: string, version: string, repo: string
  * @param location direct download url of the plugin
  * @returns boolean: true if successful download, else false
  */
-export async function downloadURL(name: string, version: string, location: string, output: string): Promise<boolean> {
+export async function downloadURL(name: string, location: string, output: string): Promise<boolean> {
   try {
     const res = await fetch(location, {
       headers: {

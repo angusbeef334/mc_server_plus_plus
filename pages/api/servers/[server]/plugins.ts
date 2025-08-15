@@ -13,9 +13,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const output = path.join(server.location, 'plugins', `${plugin.name}.jar`);
-    console.log(output);
     let success = false;
-    let version = "";
+    let version = '';
 
     try {
       switch (plugin.source) {
@@ -28,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           success = !!version;
           break;
         case "direct":
-          success = await downloadURL(plugin.name, plugin.version, plugin.location, output);
+          success = await downloadURL(plugin.name, plugin.location, output);
           break;
         default:
           res.status(400).json({ error: "Unknown plugin source type." });
