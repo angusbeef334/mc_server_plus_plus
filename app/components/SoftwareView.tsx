@@ -3,11 +3,11 @@
 import { useState } from 'react';
 
 interface SoftwareViewProps {
-  server: any;
+  serverData: any;
 }
 
-export default function SoftwareView({server}: SoftwareViewProps) {
-  server = JSON.parse(server);
+export default function SoftwareView({serverData}: SoftwareViewProps) {
+  const [server, setServer] = useState(JSON.parse(serverData));
   const [plugins, setPlugins] = useState<any[]>(server.plugins || []);
   const [status, setStatus] = useState<Record<string, { updating?: boolean; removing?: boolean; msg?: string; err?: string }>>({});
   const [serverStatus, setServerStatus] = useState<{updating?: boolean; msg?: string, err?: string}>({});

@@ -98,7 +98,7 @@ export default function ServerPage() {
             <DashboardView server={server}/>
           )}
           {activeView == 'software' && (
-            <SoftwareView server={JSON.stringify(server)}/>
+            <SoftwareView serverData={JSON.stringify(server)}/>
           )}
           {activeView == 'status' && (
             <div/>
