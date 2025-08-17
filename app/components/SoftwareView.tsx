@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface SoftwareViewProps {
   serverData: any;
+  onServerUpdate: (updatedServer: Partial<any>) => void;
+  onPluginsUpdate: (plugins: any[]) => void;
 }
 
-export default function SoftwareView({serverData}: SoftwareViewProps) {
+export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdate}: SoftwareViewProps) {
   const [server, setServer] = useState(JSON.parse(serverData));
   const [plugins, setPlugins] = useState<any[]>(server.plugins || []);
   const [status, setStatus] = useState<Record<string, { updating?: boolean; removing?: boolean; msg?: string; err?: string }>>({});
@@ -14,6 +16,12 @@ export default function SoftwareView({serverData}: SoftwareViewProps) {
 
   const setPluginStatus = (name: string, patch: Partial<{ updating: boolean; removing: boolean; msg: string; err: string }>) =>
     setStatus((s) => ({ ...s, [name]: { ...(s[name] || {}), ...patch } }));
+
+  useEffect(() => {
+    const newServer = JSON.parse(serverData);
+    setServer(newServer);
+    setPlugins(newServer.plugins || []);
+  }, [serverData]);
 
   const handlePluginUpdate = async (plugin: any) => {
     try {
@@ -33,7 +41,13 @@ export default function SoftwareView({serverData}: SoftwareViewProps) {
       const { version } = await res.json();
 
       setPluginStatus(plugin.name, { msg: (version !== plugin.version) ? 'successful update' : 'no new version', updating: false });
-      plugin.version = version;
+      
+      const newPlugins = plugins.map(p => 
+        p.name === plugin.name ? { ...p, version } : p
+      );
+      setPlugins(newPlugins);
+      
+      onPluginsUpdate(newPlugins);
     } catch (err: any) {
       setPluginStatus(plugin.name, { err: err?.message || 'unknown error', updating: false });
     }
@@ -57,7 +71,11 @@ export default function SoftwareView({serverData}: SoftwareViewProps) {
       const { newVersion } = await res.json();
 
       setServerStatus({ updating: false, msg: (newVersion !== server.build)? 'successful update' :  'no new version' })
-      server.build = newVersion;
+      
+      const updatedServer = { ...server, build: newVersion };
+      setServer(updatedServer);
+      
+      onServerUpdate({ build: newVersion });
     } catch (err: any) {
       setServerStatus({ updating: false, err: err?.message || 'unknown error'})
     }
@@ -79,7 +97,10 @@ export default function SoftwareView({serverData}: SoftwareViewProps) {
         throw new Error(data.error || 'unknown error');
       }
 
-      setPlugins((prev) => prev.filter((p) => p.name !== plugin.name));
+      const updatedPlugins = plugins.filter((p) => p.name !== plugin.name);
+      setPlugins(updatedPlugins);
+      
+      onPluginsUpdate(updatedPlugins);
     } catch (e: any) {
       setPluginStatus(plugin.name, { err: e?.message || String(e), removing: false });
     }

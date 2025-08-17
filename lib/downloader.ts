@@ -35,7 +35,7 @@ export async function downloadSpigot(name: string, version: string, id: string, 
     }
 
     if (json.version.id > version) {
-      version = json.version.id;
+      version = json.version.id.toString();
 
       const dataPath = path.join(process.cwd(), 'data', 'servers.json');
       if (fs.existsSync(dataPath)) {

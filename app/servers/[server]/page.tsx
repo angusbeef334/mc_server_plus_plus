@@ -32,6 +32,14 @@ export default function ServerPage() {
     }
   }, [serverName])
 
+  const updateServerData = (updatedServer: Partial<Server>) => {
+    setServer(prev => prev ? { ...prev, ...updatedServer } : null)
+  }
+
+  const updatePlugins = (plugins: any[]) => {
+    setServer(prev => prev ? { ...prev, plugins } : null)
+  }
+
   if (loading) {
     return (
       <label>
@@ -98,7 +106,11 @@ export default function ServerPage() {
             <DashboardView server={server}/>
           )}
           {activeView == 'software' && (
-            <SoftwareView serverData={JSON.stringify(server)}/>
+            <SoftwareView 
+              serverData={JSON.stringify(server)}
+              onServerUpdate={updateServerData}
+              onPluginsUpdate={updatePlugins}
+            />
           )}
           {activeView == 'status' && (
             <div/>
