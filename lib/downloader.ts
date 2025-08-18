@@ -125,8 +125,10 @@ export async function downloadGithub(name: string, version: string, repo: string
           const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
 
           if (Array.isArray(data)) {
+            //server
             const i = data.findIndex(server => server.plugins.some((plugin: { name: string }) => plugin.name === name));
             if (i !== -1) {
+              //plugin
               const j = data[i].plugins.findIndex((plugin: { name: string }) => plugin.name === name);
               if (j !== -1) {
                 data[i].plugins[j].version = version;

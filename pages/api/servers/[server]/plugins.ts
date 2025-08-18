@@ -16,7 +16,44 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let success = false;
     let version = '';
 
+    const dataPath = path.join(process.cwd(), 'data', 'servers.json');
+    let added = false;
     try {
+      if (fs.existsSync(dataPath)) {
+        const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
+        if (Array.isArray(data)) {
+          //server
+          const i = data.findIndex((s: any) => s.name === server.name);
+          if (i === -1) {
+            res.status(400).json({ error: "server does not exist" });
+            return;
+          }
+
+          if (!Array.isArray(data[i].plugins)) data[i].plugins = [];
+          
+          const existing = data[i].plugins.find((p: any) => p.name === plugin.name);
+          
+          if (!existing) {
+            const newPlugin = {
+              name: plugin.name,
+              version: typeof plugin.version === 'string' ? plugin.version : (plugin.version != null ? String(plugin.version) : ''),
+              source: plugin.source || 'direct',
+              location: plugin.location || ''
+            };
+            
+            data[i].plugins.push(newPlugin);
+            fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+            added = true;
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Failed to add plugin to servers.json', err);
+      res.status(500).json({ error: 'Failed to update servers data', details: String(err) });
+      return;
+    }
+
+    try {      
       switch (plugin.source) {
         case "spigot":
           version = await downloadSpigot(plugin.name, plugin.version, plugin.location, output);
@@ -30,16 +67,65 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           success = await downloadURL(plugin.name, plugin.location, output);
           break;
         default:
-          res.status(400).json({ error: "Unknown plugin source type." });
+          res.status(400).json({ error: "invalid plugin source" });
           return;
       }
     } catch (err) {
+      if (added) {
+        try {
+          if (fs.existsSync(dataPath)) {
+            const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
+
+            if (Array.isArray(data)) {
+              const i = data.findIndex((s: any) => s.name === server.name);
+              
+              if (i !== -1 && Array.isArray(data[i].plugins)) {
+                data[i].plugins = data[i].plugins.filter((p: any) => p.name !== plugin.name);
+                fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+              }
+            }
+          }
+        } catch (e) {
+          console.error('failed download - failed to restore servers.json', e);
+        }
+
+        try {
+          if (fs.existsSync(output)) fs.unlinkSync(output);
+        } catch (e) {
+          console.error('failed download - failed to remove plugin jarfile', e);
+        }
+      }
+
       res.status(500).json({ error: "Failed to download plugin", details: String(err) });
       return;
     }
+
     if (success) {
       res.status(200).json({ message: "Plugin downloaded successfully", version });
     } else {
+      if (added) {
+        try {
+          if (fs.existsSync(dataPath)) {
+            const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
+            if (Array.isArray(data)) {
+              const si = data.findIndex((s: any) => s.name === server.name);
+              if (si !== -1 && Array.isArray(data[si].plugins)) {
+                data[si].plugins = data[si].plugins.filter((p: any) => p.name !== plugin.name);
+                fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+              }
+            }
+          }
+        } catch (e) {
+          console.error('failed download - failed to restore servers.json', e);
+        }
+
+        try {
+          if (fs.existsSync(output)) fs.unlinkSync(output);
+        } catch (e) {
+          console.error('failed download - failed to remove plugin jarfile', e);
+        }
+      }
+
       res.status(500).json({ error: "Failed to download plugin" });
     }
   } else if (req.method === "DELETE") {

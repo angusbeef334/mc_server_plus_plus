@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS } from 'react';
 
 interface SoftwareViewProps {
   serverData: any;
@@ -14,6 +14,9 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
   const [status, setStatus] = useState<Record<string, { updating?: boolean; removing?: boolean; msg?: string; err?: string }>>({});
   const [serverStatus, setServerStatus] = useState<{updating?: boolean; msg?: string, err?: string}>({});
 
+  const [addOpen, setAddOpen] = useState(false);
+  const [addSource, setAddSource] = useState<'spigot' | 'github' | 'direct'>('spigot');
+
   const setPluginStatus = (name: string, patch: Partial<{ updating: boolean; removing: boolean; msg: string; err: string }>) =>
     setStatus((s) => ({ ...s, [name]: { ...(s[name] || {}), ...patch } }));
 
@@ -22,6 +25,35 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
     setServer(newServer);
     setPlugins(newServer.plugins || []);
   }, [serverData]);
+
+  const handleAddPlugin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = (document.getElementById('in-name') as HTMLInputElement).value;
+    const source = (document.getElementById('in-source') as HTMLInputElement).value;
+    const location = (document.getElementById('in-location') as HTMLInputElement).value;
+    console.info(`add plugin ${name} from ${source} ${location}`);
+
+    const plugin = {
+      name: name,
+      source: source,
+      location: location,
+      version: '-1',
+    }
+    
+    const res = await fetch(`/api/servers/${server.name}/plugins`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({server, plugin})
+    })
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || 'unknown error');
+    }
+
+    const { version } = await res.json();
+    alert(version);
+  }
 
   const handlePluginUpdate = async (plugin: any) => {
     try {
@@ -141,7 +173,7 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
       <div>
         <h3 className="text-lg text-white">Plugins</h3>
 
-        <button className="bg-gray-800 hover:bg-gray-700 p-2 m-1 rounded-md">
+        <button className="bg-gray-800 hover:bg-gray-700 p-2 m-1 rounded-md" onClick={() => setAddOpen(true)}>
           Add Plugin
         </button>
 
@@ -194,6 +226,53 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
           </div>
         ) : (
           <label className="text-white">No plugins installed</label>
+        )}
+        {addOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-gray-800 rounded-lg shadow-xl p-4 sm:p-6 w-full max-w-md relative border border-gray-700 mx-2">
+              <button
+                onClick={() => setAddOpen(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+              <h2 className="text-lg sm:text-xl mb-4 text-white">Add Plugin</h2>
+              <form onSubmit={handleAddPlugin}>
+                <input
+                  type="text"
+                  id="in-name"
+                  placeholder="Name"
+                  className="bg-gray-700 p-2 m-1 rounded-md"
+                />
+                <select id="in-source" className="bg-gray-700 hover:bg-gray-600 p-2 m-1 rounded-md" value={addSource} onChange={(e) => setAddSource(e.target.value as any)}>
+                  <option value="spigot">Spigot</option>
+                  <option value="github">GitHub</option>
+                  <option value="direct">Direct</option>
+                </select>
+                <input 
+                  type="text" 
+                  id="in-location"
+                  placeholder={addSource === 'spigot' ? 'Plugin ID' : addSource === 'github' ? 'Repository name' : 'Direct download URL'}
+                  className="bg-gray-700 p-2 m-1 rounded-md"
+                />
+                <br/>
+                <input type="submit" value="Add" className="bg-blue-700 rounded-md p-2 m-1"/>
+              </form>
+            </div>
+          </div>
         )}
       </div>
     </div>
