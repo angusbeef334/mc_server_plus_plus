@@ -57,7 +57,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       switch (plugin.source) {
         case "spigot":
           version = await downloadSpigot(plugin.name, plugin.version, plugin.location, output);
-          success = !!version;
+          success = !!version && version != '-2';
+          if (version == '-2') res.status(500).json({error: 'plugin is externally hosted, spigot download not supported'})
           break;
         case "github":
           version = await downloadGithub(plugin.name, plugin.version, plugin.location, output);
@@ -78,7 +79,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             if (Array.isArray(data)) {
               const i = data.findIndex((s: any) => s.name === server.name);
-              
+
               if (i !== -1 && Array.isArray(data[i].plugins)) {
                 data[i].plugins = data[i].plugins.filter((p: any) => p.name !== plugin.name);
                 fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");

@@ -31,7 +31,7 @@ export async function downloadSpigot(name: string, version: string, id: string, 
     const json = await res.json();
     if (json.external) {
       console.error(`plugin ${name} is external, try ${json.file.externalUrl}`);
-      return '';
+      return '-2';
     }
 
     if (json.version.id > version) {

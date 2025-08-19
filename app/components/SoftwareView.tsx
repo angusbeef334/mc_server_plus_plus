@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS } from 'react';
+import { useState, useEffect } from 'react';
 
 interface SoftwareViewProps {
   serverData: any;
@@ -12,6 +12,7 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
   const [server, setServer] = useState(JSON.parse(serverData));
   const [plugins, setPlugins] = useState<any[]>(server.plugins || []);
   const [status, setStatus] = useState<Record<string, { updating?: boolean; removing?: boolean; msg?: string; err?: string }>>({});
+  const [addStatus, setAddStatus] = useState<{ adding?: boolean; removing?: boolean; msg?: string; err?: string }>({});
   const [serverStatus, setServerStatus] = useState<{updating?: boolean; msg?: string, err?: string}>({});
 
   const [addOpen, setAddOpen] = useState(false);
@@ -32,6 +33,7 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
     const source = (document.getElementById('in-source') as HTMLInputElement).value;
     const location = (document.getElementById('in-location') as HTMLInputElement).value;
     console.info(`add plugin ${name} from ${source} ${location}`);
+    setAddStatus({adding: true, err: undefined, msg: undefined});
 
     const plugin = {
       name: name,
@@ -48,11 +50,20 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      throw new Error(data.error || 'unknown error');
+      setAddStatus({adding: false, err: data?.error || 'unknown error'});
+      return;
     }
 
     const { version } = await res.json();
-    alert(version);
+
+    setAddStatus({adding: false, msg: 'successfully added plugin'});
+    
+    plugin.version = version;
+    const newPlugins = plugins;
+    newPlugins.push(plugin)
+
+    setPlugins(newPlugins);
+    onPluginsUpdate(newPlugins);
   }
 
   const handlePluginUpdate = async (plugin: any) => {
@@ -129,10 +140,12 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
         throw new Error(data.error || 'unknown error');
       }
 
-      const updatedPlugins = plugins.filter((p) => p.name !== plugin.name);
-      setPlugins(updatedPlugins);
+      setPluginStatus(plugin.name, { removing: false, err: undefined, msg: undefined })
+
+      const newPlugins = plugins.filter((p) => p.name !== plugin.name);
       
-      onPluginsUpdate(updatedPlugins);
+      setPlugins(newPlugins); 
+      onPluginsUpdate(newPlugins);
     } catch (e: any) {
       setPluginStatus(plugin.name, { err: e?.message || String(e), removing: false });
     }
@@ -173,7 +186,7 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
       <div>
         <h3 className="text-lg text-white">Plugins</h3>
 
-        <button className="bg-gray-800 hover:bg-gray-700 p-2 m-1 rounded-md" onClick={() => setAddOpen(true)}>
+        <button className="bg-gray-800 hover:bg-gray-700 p-2 m-1 rounded-md" onClick={() => {setAddOpen(true);setAddStatus({adding: true, err: undefined, msg: undefined});}}>
           Add Plugin
         </button>
 
@@ -271,6 +284,12 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
                 <br/>
                 <input type="submit" value="Add" className="bg-blue-700 rounded-md p-2 m-1"/>
               </form>
+              {(addStatus.msg || addStatus.err) && (
+                <div className="w-full m-1 text-sm">
+                  {addStatus.msg && <span className="text-green-400">{addStatus.msg}</span>}
+                  {addStatus.err && <span className="text-red-400">{addStatus.err}</span>}
+                </div>
+              )}
             </div>
           </div>
         )}
