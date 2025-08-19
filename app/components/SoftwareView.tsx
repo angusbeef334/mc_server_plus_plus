@@ -103,7 +103,7 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
       const res = await fetch (`/api/servers/${server.name}/server`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ server, version: server.build }),
+        body: JSON.stringify({ server, build: server.build.toString() }),
       });
 
       if (!res.ok) {
@@ -160,7 +160,7 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
   return (
     <div className="view bg-gray-900">
       <div>
-        <h3 className="text-lg text-white">Server</h3>
+        <h3 className="text-lg text-white font-semibold">Server</h3>
         <label>Minecraft: {server.version}</label>
         <br/>
         <label>{server.software}: {server.build}</label>
@@ -184,7 +184,7 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
         </div>
       </div>
       <div>
-        <h3 className="text-lg text-white">Plugins</h3>
+        <h3 className="text-lg text-white font-semibold">Plugins</h3>
 
         <button className="bg-gray-800 hover:bg-gray-700 p-2 m-1 rounded-md" onClick={() => {setAddOpen(true);setAddStatus({adding: true, err: undefined, msg: undefined});}}>
           Add Plugin

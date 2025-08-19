@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Server } from '@/lib/servers'
+import SettingsCard from '@/app/components/SettingsView'
 
 export default function ServerPage() {
   const params = useParams()
@@ -116,7 +117,10 @@ export default function ServerPage() {
             <div/>
           )}
           {activeView == 'settings' && (
-            <div/>
+            <SettingsCard
+              serverData={JSON.stringify(server)}
+              onServerUpdate={updateServerData}
+            />
           )}
         </div>
       </div>

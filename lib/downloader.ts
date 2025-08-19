@@ -50,19 +50,19 @@ export async function downloadSpigot(name: string, version: string, id: string, 
                 data[i].plugins[j].version = version;
                 fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
               } else {
-                console.error(`Plugin ${name} not found in server plugins.`);
+                console.error('plugin does not exist');
               }
             } else {
-              console.error(`Server containing plugin ${name} not found.`);
+              console.error('server does not exist');
             }
           } else {
-            console.error(`Invalid data format in ${dataPath}. Expected an array.`);
+            console.error('invalid server data');
           }
         } catch (error) {
-          console.error(`Error reading or parsing ${dataPath}:`, error);
+          console.error(`failed to read data: ${error || 'unknown error'}`);
         }
       } else {
-        console.error(`File ${dataPath} does not exist.`);
+        console.error(`server data file does not exist`);
       }
     } else {
       console.log(`no new version of ${name}, aborting`);
@@ -143,10 +143,10 @@ export async function downloadGithub(name: string, version: string, repo: string
             console.error('invalid data format');
           }
         } catch (error) {
-          console.error(`failed to read or parse ${dataPath}`);
+          console.error(`failed to get data`);
         }
       } else {
-        console.error(`file ${dataPath} does not exist`);
+        console.error(`data file does not exist`);
       }
     } else {
       console.log(`no new version of ${name}, aborting`);
