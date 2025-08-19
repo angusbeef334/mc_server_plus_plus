@@ -222,9 +222,6 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
                       >
                         {st.removing ? 'Removing…' : 'Remove'}
                       </button>
-                      <button className="bg-gray-800 hover:bg-gray-700 p-2 m-1 rounded-md">
-                        Configure
-                      </button>
                     </div>
                   </div>
                   {(st.msg || st.err) && (
