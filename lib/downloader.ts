@@ -12,7 +12,7 @@ export interface Plugin {
  * @param name name of the plugin
  * @param version old version of the plugin
  * @param id spigotmc plugin id
- * @returns string: new/current version if download successful/no new ver, empty if download failed
+ * @returns string: new/current version if download successful/no new ver, empty if download failed, -2 if plugin is external (can't directly download)
  */
 export async function downloadSpigot(name: string, version: string, id: string, output: string): Promise<string> {
   const url = `https://api.spiget.org/v2/resources/${id}`;
@@ -92,7 +92,7 @@ export async function downloadSpigot(name: string, version: string, id: string, 
  */
 export async function downloadGithub(name: string, version: string, repo: string, output: string): Promise<string> {
   try {
-    const res = await fetch('https://api.github.com/repos/' + repo + '/releases/latest', {
+    const res = await fetch(`https://api.github.com/repos/${repo}/releases/latest`, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36'
       }
@@ -157,16 +157,72 @@ export async function downloadGithub(name: string, version: string, repo: string
 
     return res1? newVersion : '';
   } catch (err) {
-    console.error(`failed to download plugin ${name}: ${err || 'unknown error'}`);
+    console.error(`[github] failed to download ${name}: ${err || 'unknown error'}`);
     return '';
   }
+}
+
+export async function downloadHangar(name: string, version: string, software: string, id: string, output: string): Promise<string> {
+  const url = `https://hangar.papermc.io/api/v1/projects/${id}/versions`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    const ver = data.result[0].id;
+    if (data.result[0].downloads[software.toUpperCase()].externalUrl !== null) return '-2';
+    if (ver === version) return version;
+    
+    const url1 = data.result[0].downloads[software.toUpperCase()].downloadUrl;
+    const res1 = await downloadURL(name, url1, output);
+
+    const dataPath = path.join(process.cwd(), 'data', 'servers.json');
+    if (fs.existsSync(dataPath)) {
+      try {
+        const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
+
+        if (Array.isArray(data)) {
+          //server
+          const i = data.findIndex(server => server.plugins.some((plugin: { name: string }) => plugin.name === name));
+          if (i !== -1) {
+            //plugin
+            const j = data[i].plugins.findIndex((plugin: { name: string }) => plugin.name === name);
+            if (j !== -1) {
+              data[i].plugins[j].version = ver.toString();
+              fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+            } else {
+              console.error(`plugin does not exist: ${name}`);
+            }
+          } else {
+            console.error('server not found');
+          }
+        } else {
+          console.error('invalid data format');
+        }
+      } catch (error) {
+        console.error(`failed to get data`);
+      }
+    } else {
+      console.error(`data file does not exist`);
+    }
+
+    return res1? ver : '';
+  } catch (err) {
+    console.error(`[hangar] failed to download ${name}: ${err || 'unknown error'}`);
+    return '';
+  }
+}
+
+export async function downloadBukkit(name: string, version: string, id: string, output: string) {
+  const url = `https://dev.bukkit.org/projects/${id}/files/latest`;
+
+  await downloadURL(name, url, output);
 }
 
 /**
  * @param paperVer current build of paper
  * @param mcVer current version of mc
- * @param output 
- * @returns 
+ * @param output the output path of the downloaded software
+ * @returns string: new version if download successful else blank string
  */
 export async function downloadPaper(paperVer: string, mcVer: string, output: string): Promise<string> {
   const location = `https://fill.papermc.io/v3/projects/paper/versions/${mcVer}/builds`

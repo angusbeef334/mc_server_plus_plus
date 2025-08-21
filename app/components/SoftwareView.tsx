@@ -16,7 +16,7 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
   const [serverStatus, setServerStatus] = useState<{updating?: boolean; msg?: string, err?: string}>({});
 
   const [addOpen, setAddOpen] = useState(false);
-  const [addSource, setAddSource] = useState<'spigot' | 'github' | 'direct'>('spigot');
+  const [addSource, setAddSource] = useState<'spigot' | 'github' | 'hangar' | 'bukkit' | 'direct'>('spigot');
 
   const setPluginStatus = (name: string, patch: Partial<{ updating: boolean; removing: boolean; msg: string; err: string }>) =>
     setStatus((s) => ({ ...s, [name]: { ...(s[name] || {}), ...patch } }));
@@ -270,6 +270,8 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
                 <select id="in-source" className="bg-gray-700 hover:bg-gray-600 p-2 m-1 rounded-md" value={addSource} onChange={(e) => setAddSource(e.target.value as any)}>
                   <option value="spigot">Spigot</option>
                   <option value="github">GitHub</option>
+                  <option value="bukkit">Bukkit</option>
+                  <option value="hangar">Hangar</option>
                   <option value="direct">Direct</option>
                 </select>
                 <input 

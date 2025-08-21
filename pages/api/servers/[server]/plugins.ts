@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { downloadSpigot, downloadGithub, downloadURL } from "@/lib/downloader";
+import { downloadSpigot, downloadGithub, downloadURL, downloadBukkit, downloadHangar } from "@/lib/downloader";
 import path from "path";
 import fs from 'fs'
 
@@ -62,6 +62,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           break;
         case "github":
           version = await downloadGithub(plugin.name, plugin.version, plugin.location, output);
+          success = !!version;
+          break;
+        case "bukkit":
+          console.error('bukkit not yet supported');
+          success = false;
+          break;
+        case "hangar":
+          version = await downloadHangar(plugin.name, plugin.version, server.software, plugin.location, output);
           success = !!version;
           break;
         case "direct":
