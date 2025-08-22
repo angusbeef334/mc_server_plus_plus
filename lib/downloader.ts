@@ -170,7 +170,7 @@ export async function downloadHangar(name: string, version: string, software: st
     const data = await res.json();
     const ver = data.result[0].id;
     if (data.result[0].downloads[software.toUpperCase()].externalUrl !== null) return '-2';
-    if (ver === version) return version;
+    if (ver.toString() === version) return version;
     
     const url1 = data.result[0].downloads[software.toUpperCase()].downloadUrl;
     const res1 = await downloadURL(name, url1, output);
