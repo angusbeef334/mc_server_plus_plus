@@ -83,7 +83,7 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
 
       const { version } = await res.json();
 
-      setPluginStatus(plugin.name, { msg: (version !== plugin.version) ? 'successful update' : 'no new version', updating: false });
+      setPluginStatus(plugin.name, { msg: (version !== plugin.version || plugin.source == "direct" || plugin.source == "bukkit") ? 'successful update' : 'no new version', updating: false });
       
       const newPlugins = plugins.map(p => 
         p.name === plugin.name ? { ...p, version } : p

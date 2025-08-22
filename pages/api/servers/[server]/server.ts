@@ -31,9 +31,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { server, version } = req.body;
 
     if (typeof server !== "object" || typeof version !== "string") {
-      console.log( server);
-      console.log( version);
-      console.log(req.body);
       res.status(400).json({ error: "Invalid params"});
       return;
     }

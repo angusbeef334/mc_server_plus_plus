@@ -65,8 +65,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           success = !!version;
           break;
         case "bukkit":
-          console.error('bukkit not yet supported');
-          success = false;
+          success = await downloadBukkit(plugin.name, plugin.version, plugin.location, output);
+          if (success) version = "-1";
           break;
         case "hangar":
           version = await downloadHangar(plugin.name, plugin.version, server.software, plugin.location, output);
@@ -74,6 +74,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           break;
         case "direct":
           success = await downloadURL(plugin.name, plugin.location, output);
+          if (success) version = "-1";
           break;
         default:
           res.status(400).json({ error: "invalid plugin source" });

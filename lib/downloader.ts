@@ -212,10 +212,10 @@ export async function downloadHangar(name: string, version: string, software: st
   }
 }
 
-export async function downloadBukkit(name: string, version: string, id: string, output: string) {
+export async function downloadBukkit(name: string, version: string, id: string, output: string): Promise<boolean> {
   const url = `https://dev.bukkit.org/projects/${id}/files/latest`;
 
-  await downloadURL(name, url, output);
+  return await downloadURL(name, url, output);
 }
 
 /**
