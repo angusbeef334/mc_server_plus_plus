@@ -204,7 +204,15 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
                     <div className="flex items-center space-x-2">
                       <span className="text-white font-medium">{plugin.name}</span>
                       {plugin.version && (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-700 text-gray-200">v{plugin.version}</span>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-700 text-gray-200">
+                          {plugin.version !== '-1' && <>v{plugin.version}</>}
+                          {plugin.version === '-1' && <>No Version Available</>}
+                        </span>
+                      )}
+                      {plugin.source && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-700 text-gray-200">
+                          {plugin.source}
+                        </span>
                       )}
                     </div>
                     <div className="flex items-center">
