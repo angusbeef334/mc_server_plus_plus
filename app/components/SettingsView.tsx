@@ -52,10 +52,10 @@ export default function SettingsCard({ serverData, onServerUpdate }: SettingsCar
         <h3 className="text-lg text-white font-semibold">Server</h3>
         <label>Minecraft: {server.version}</label>
         <section className="flex flex-row items-center">
-          <select className="bg-gray-800 m-1 p-2 rounded-md hover:bg-gray-700" id="in-version">
-            {versions.length === 0 && (
+          {versions.length === 0 && (
               <>Loading versions...</>
-            )}
+          )}
+          <select className="bg-gray-800 m-1 p-2 rounded-md hover:bg-gray-700" id="in-version">
             {versions.map((version) => (
               <option key={version.version.id} value={version.version.id} className="text-sm text-gray-300">
                 {version.version.id}
