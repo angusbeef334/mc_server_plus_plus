@@ -285,7 +285,13 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
                 <input 
                   type="text" 
                   id="in-location"
-                  placeholder={addSource === 'spigot' ? 'Plugin ID' : addSource === 'github' ? 'Repository name' : 'Direct download URL'}
+                  placeholder={
+                    addSource === 'spigot' ? 'Spigot plugin ID' :
+                    addSource === 'github' ? 'Repository name' :
+                    addSource === 'bukkit' ? 'Bukkit plugin ID' :
+                    addSource === 'hangar' ? 'Hangar plugin ID' :
+                    'Direct download URL'
+                  }
                   className="bg-gray-700 p-2 m-1 rounded-md"
                 />
                 <br/>
