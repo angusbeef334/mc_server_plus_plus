@@ -33,7 +33,7 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
     const source = (document.getElementById('in-source') as HTMLInputElement).value;
     const location = (document.getElementById('in-location') as HTMLInputElement).value;
     console.info(`add plugin ${name} from ${source} ${location}`);
-    setAddStatus({adding: true, err: undefined, msg: undefined});
+    setAddStatus({adding: true, err: undefined, msg: 'Downloading'});
 
     const plugin = {
       name: name,

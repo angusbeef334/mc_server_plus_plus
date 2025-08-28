@@ -12,6 +12,7 @@ export interface Plugin {
  * @param name name of the plugin
  * @param version old version of the plugin
  * @param id spigotmc plugin id
+ * @param output output path of the downloaded plugin
  * @returns string: new/current version if download successful/no new ver, empty if download failed, -2 if plugin is external (can't directly download)
  */
 export async function downloadSpigot(name: string, version: string, id: string, output: string): Promise<string> {
@@ -88,6 +89,7 @@ export async function downloadSpigot(name: string, version: string, id: string, 
  * @param name name of the plugin
  * @param version old version of the plugin
  * @param repo github repository id of the plugin
+ * @param output output path of downloaded plugin
  * @returns string: empty if download failed, otherwise the new version
  */
 export async function downloadGithub(name: string, version: string, repo: string, output: string): Promise<string> {
@@ -162,6 +164,14 @@ export async function downloadGithub(name: string, version: string, repo: string
   }
 }
 
+/**
+ * @param name name of the plugin
+ * @param version old version of the plugin
+ * @param software the software (paper, velocity, waterfall) to download plugin for
+ * @param id hangar plugin id
+ * @param output output path of the downloaded plugin
+ * @returns string: new/current version if download successful/no new ver, empty if download failed, -2 if plugin is external (can't directly download)
+ */
 export async function downloadHangar(name: string, version: string, software: string, id: string, output: string): Promise<string> {
   const url = `https://hangar.papermc.io/api/v1/projects/${id}/versions`;
 
@@ -212,6 +222,13 @@ export async function downloadHangar(name: string, version: string, software: st
   }
 }
 
+/**
+ * @param name name of the plugin
+ * @param version old version of the plugin
+ * @param id bukkit plugin id
+ * @param output output path of downloaded plugin
+ * @returns boolean: true if download success, else false
+ */
 export async function downloadBukkit(name: string, version: string, id: string, output: string): Promise<boolean> {
   const url = `https://dev.bukkit.org/projects/${id}/files/latest`;
 

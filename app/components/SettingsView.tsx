@@ -43,7 +43,7 @@ export default function SettingsCard({ serverData, onServerUpdate }: SettingsCar
     newServer.version = version;
     setServer(newServer);
     onServerUpdate(newServer);
-    alert('Minecraft version has been updated. Go to software tab and update server to complete.')
+    alert('To complete version change, go to software tab and update the server software.');
   }
 
   return (
