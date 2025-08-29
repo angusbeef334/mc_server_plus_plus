@@ -6,6 +6,7 @@ interface ServerViewProps {
 
 export default function ServerView({server}: ServerViewProps) {
   const [log, setLog] = useState("");
+  const [status, setStatus] = useState("Offline")
 
   useEffect(() => {
     const fetchLog = async () => {
@@ -19,6 +20,21 @@ export default function ServerView({server}: ServerViewProps) {
     };
     fetchLog();
     const interval = setInterval(fetchLog, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const res = await fetch(`/api/servers/${server.name}/status`);
+        const data = await res.json();
+        setStatus(data.status? "Online" : "Offline");
+      } catch {
+        setStatus("Offline · Error");
+      }
+    }
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 2000);
     return () => clearInterval(interval);
   }, []);
 
@@ -45,8 +61,8 @@ export default function ServerView({server}: ServerViewProps) {
       <div className="flex flex-row">
         <textarea readOnly className="bg-black w-[50%] h-96" style={{ fontFamily: 'Source Code Pro, monospace' }} value={log}/>
         <div className="p-4 m-2">
-          <h3 className="text-lg text-white">Status</h3>
-          <label>Running</label>
+          <h3 className="text-lg font-semibold text-white">Status</h3>
+          <label>{status}</label>
         </div>
       </div>
     </div>

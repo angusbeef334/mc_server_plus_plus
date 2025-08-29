@@ -10,12 +10,7 @@ export async function GET(req: Request, { params }: { params: { server: string }
     return Response.json({ log: '', error: 'Server does not exist' }, { status: 404 });
   }
 
-  const location = path.join(serverObj.location, 'logs', 'latest.log');
+  const location = path.join(serverObj.location, 'world', 'session.lock');
 
-  try {
-    const data = fs.readFileSync(location, 'utf8');
-    return Response.json({ log: data });
-  } catch (err) {
-    return Response.json({ log: '', error: 'Failed to read logfile' }, { status: 500 });
-  }
+  return Response.json({ status: fs.existsSync(location) })
 }
