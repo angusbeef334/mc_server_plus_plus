@@ -56,6 +56,32 @@ export default function ServerView({server}: ServerViewProps) {
     document.head.appendChild(link3);
   }
 
+  const handleStartServer = async () => {
+    if (status == 'Offline') {
+      try {
+        const res = await fetch(`/api/servers/${server.name}/server?action=start`, {
+          method: 'GET'
+        });
+        if (!res.ok) {
+          alert(`error starting server: ${(await res.json()).message}`)
+        }
+      } catch (e) {
+        alert(`error starting server: ${e}`);
+      }
+    } else {
+      try {
+        const res = await fetch(`/api/servers/${server.name}/server?action=stop`, {
+          method: 'GET'
+        });
+        if (!res.ok) {
+          alert(`error stopping server: ${(await res.json()).message}`)
+        }
+      } catch (e) {
+        alert(`error stopping server: ${e}`)
+      }
+    }
+  }
+
   return (
     <div className="view bg-gray-900">
       <div className="flex flex-row">
@@ -63,6 +89,16 @@ export default function ServerView({server}: ServerViewProps) {
         <div className="p-4 m-2">
           <h3 className="text-lg font-semibold text-white">Status</h3>
           <label>{status}</label>
+          <button 
+            className="p-2 m-2 bg-gray-800 rounded-md hover:bg-gray-700"
+            onClick={handleStartServer}
+          >
+            {status == "Online" && (
+              <>Stop</>
+            ) || (
+              <>Start</>
+            )}
+          </button>
         </div>
       </div>
     </div>

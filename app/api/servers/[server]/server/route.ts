@@ -1,6 +1,48 @@
 import { downloadPaper } from "@/lib/downloader";
+import { ChildProcess, spawn } from "child_process"
 import path from "path";
 import fs from 'fs'
+import { getServer } from "@/lib/servers";
+
+let child: ChildProcess;
+
+export async function GET(req: Request) {
+  const params = new URL(req.url).searchParams;
+  const action = params.get('action');
+  const server = getServer('angusbeef');
+
+  if (server == null) {
+    return Response.json({ message: "Server does not exist" }, { status: 400 });
+  }
+
+  if (action == 'start') {
+    child = spawn('java', ['-Xms2G', '-Xmx4G', '-jar', `${server.location}/server.jar`], { cwd: server.location });
+
+    child.stdout?.on('data', (data) => {
+      if ((data as string).includes('You need to agree to the EULA in order to run the server.')) {
+        try {
+          fs.writeFileSync(path.join(server.location, 'eula.txt'), 'eula=true');
+        } catch {
+          console.error('error writing eula');
+          return Response.json({ message: "Failed to write EULA, please write manually" }, { status: 500 });
+        }
+      }
+      console.log(`stdout: ${data}`);
+    });
+
+    child.stderr?.on('data', (data) => {
+      console.error(`stderr: ${data}`);
+    });
+
+    child.on('close', (code) => {
+      console.log(`child process exited with code ${code}`);
+    });
+    return Response.json({ message: "Successfully started server" }, { status: 200 });
+  } else if (action == 'stop') {
+    child.kill();
+    return Response.json({ message: "Successfully stopped server" }, { status: 200 });
+  }
+}
 
 export async function PUT(req: Request) {
   const body = await req.json();
