@@ -18,6 +18,7 @@ export async function GET(req: Request) {
     return Response.json({ message: "Successfully started server" }, { status: 200 });
   } else if (action == 'stop') {
     stop();
+    return Response.json({ message: "Successfully stopped server" }, { status: 200 });
   }
 }
 
