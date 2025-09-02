@@ -16,15 +16,22 @@ export interface Server {
   plugins: Plugin[];
 }
 
-let child: ChildProcess;
+let servers: { key: string, process: ChildProcess, status: string }[] = [];
+
+function getKey(server: Server) {
+  return `${server.name}:${server.location.replaceAll('/', '_')}`;
+}
 
 export function start(server: Server) {
-  child = spawn('java', ['-Xms2G', '-Xmx4G', '-jar', `${server.location}/server.jar`], { cwd: server.location });
-  
+  const key = getKey(server);
+  let child = spawn('java', ['-Xms2G', '-Xmx4G', '-jar', `${server.location}/server.jar`], { cwd: server.location });
+  servers.push({ key, process: child, status: 'Online'})
+
   child.stdout?.on('data', (data) => {
-    if ((data as string).includes('You need to agree to the EULA in order to run the server.')) {
+    if ((data as string).includes('You need to agree to the EULA')) {
       try {
         fs.writeFileSync(path.join(server.location, 'eula.txt'), 'eula=true');
+        child.kill();
         child = spawn('java', ['-Xms2G', '-Xmx4G', '-jar', path.join(server.location, 'server.jar')], { cwd: server.location });
       } catch {
         console.error('error writing eula');
@@ -43,7 +50,14 @@ export function start(server: Server) {
   });
 }
 
-export function stop() {
-  child.kill()
-  return Response.json({ message: "Successfully stopped server" }, { status: 200 });
+export function stop(server: Server) {
+  const key = getKey(server);
+  const instance = servers.find(s => s.key === key);
+  console.log(servers);
+  instance?.process.stdin?.write('stop\n', () => {
+    servers.filter(s => s.key !== instance?.key);
+    return Response.json({ message: "Successfully stopped server" }, { status: 200 });
+  });
+
+  return Response.json({ message: "Failed to stop server" }, { status: 500 });
 }
