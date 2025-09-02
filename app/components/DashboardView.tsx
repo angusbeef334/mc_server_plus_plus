@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface ServerViewProps {
   server: any;
@@ -7,11 +7,17 @@ interface ServerViewProps {
 export default function ServerView({server}: ServerViewProps) {
   const [log, setLog] = useState("");
   const [status, setStatus] = useState("Offline")
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const bottomRef = useRef(true);
 
   useEffect(() => {
     const fetchLog = async () => {
       try {
-        const res = await fetch(`/api/servers/${server.name}/logs/latest`);
+        const textarea = textareaRef.current;
+        if (textarea) {
+          bottomRef.current = textarea.scrollHeight - textarea.scrollTop - textarea.clientHeight < 5;
+        }
+        const res = await fetch(`/api/servers/${server.name}/server?action=log`);
         const data = await res.json();
         setLog(data.log);
       } catch {
@@ -24,11 +30,18 @@ export default function ServerView({server}: ServerViewProps) {
   }, []);
 
   useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea && bottomRef.current) {
+      textarea.scrollTop = textarea.scrollHeight;
+    }
+  }, [log]);
+
+  useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const res = await fetch(`/api/servers/${server.name}/status`);
+        const res = await fetch(`/api/servers/${server.name}/server?action=status`);
         const data = await res.json();
-        setStatus(data.status? "Online" : "Offline");
+        setStatus(data.status);
       } catch {
         setStatus("Offline · Error");
       }
@@ -56,13 +69,76 @@ export default function ServerView({server}: ServerViewProps) {
     document.head.appendChild(link3);
   }
 
+  const handleStartServer = async () => {
+    if (status == 'Offline') {
+      try {
+        const res = await fetch(`/api/servers/${server.name}/server?action=start`, {
+          method: 'GET'
+        });
+        if (!res.ok) {
+          alert(`error starting server: ${(await res.json()).message}`)
+        }
+      } catch (e) {
+        alert(`error starting server: ${e}`);
+      }
+    } else {
+      try {
+        const res = await fetch(`/api/servers/${server.name}/server?action=stop`, {
+          method: 'GET'
+        });
+        if (!res.ok) {
+          alert(`error stopping server: ${(await res.json()).message}`)
+        }
+      } catch (e) {
+        alert(`error stopping server: ${e}`)
+      }
+    }
+  }
+
   return (
     <div className="view bg-gray-900">
       <div className="flex flex-row">
-        <textarea readOnly className="bg-black w-[50%] h-96" style={{ fontFamily: 'Source Code Pro, monospace' }} value={log}/>
+        <div className="flex flex-col w-[60%]">
+          <textarea
+            readOnly
+            id="textarea-log"
+            ref={textareaRef}
+            className="bg-black h-96"
+            style={{ fontFamily: 'Source Code Pro, monospace' }}
+            value={log}
+          />
+          <input
+            type="text"
+            className="bg-gray-800 p-2 rounded-md"
+            placeholder=">"
+            onKeyDown={async (e) => {
+              if (e.key === "Enter") {
+                const command = (e.target as HTMLInputElement).value;
+                const res = await fetch(`/api/servers/${server.name}/server`, {
+                  method: "POST",
+                  body: JSON.stringify({ server, cmd: command })
+                })
+
+                if (!res.ok) {
+                  alert(`Failed to send command: ${res.statusText}`);
+                }
+              }
+            }}
+          />
+        </div>
         <div className="p-4 m-2">
           <h3 className="text-lg font-semibold text-white">Status</h3>
           <label>{status}</label>
+          <button 
+            className="p-2 m-2 bg-gray-800 rounded-md hover:bg-gray-700"
+            onClick={handleStartServer}
+          >
+            {status == "Online" && (
+              <>Stop</>
+            ) || (
+              <>Start</>
+            )}
+          </button>
         </div>
       </div>
     </div>

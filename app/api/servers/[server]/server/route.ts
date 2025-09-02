@@ -1,6 +1,44 @@
 import { downloadPaper } from "@/lib/downloader";
 import path from "path";
 import fs from 'fs'
+import { getServer } from "@/lib/servers";
+import { start, status, stop, log, command } from "@/lib/serverState"
+
+export async function GET(req: Request, { params }: { params: Promise<{ server: string }> }) {
+  const urlParams = new URL(req.url).searchParams;
+  const action = urlParams.get('action');
+  const server = getServer((await params).server);
+
+  if (server == null) {
+    return Response.json({ message: "Server does not exist" }, { status: 400 });
+  }
+
+  if (action == 'start') {
+    start(server);
+    return Response.json({ message: "Successfully started server" }, { status: 200 });
+  } else if (action == 'stop') {
+    stop(server);
+    return Response.json({ message: "Successfully stopped server" }, { status: 200 });
+  } else if (action == 'status') {
+    const res = status(server);
+    return Response.json({ status: res }, { status: 200 });
+  } else if (action === 'log') {
+    const res = log(server);
+    return Response.json({ log: res }, { status: 200 });
+  } else {
+    return Response.json({ message: "Invalid action" }, { status: 400 });
+  }
+}
+
+export async function POST(req: Request) {
+  const { server, cmd } = await req.json();
+  if (!server || !cmd) {
+    return Response.json({ message: "server/plugin param missing" }, { status: 400 });
+  }
+
+  command(server, cmd);
+  return Response.json({ message: "success" }, { status: 200 });
+}
 
 export async function PUT(req: Request) {
   const body = await req.json();
