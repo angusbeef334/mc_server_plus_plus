@@ -24,7 +24,7 @@ function getKey(server: Server) {
 
 export function start(server: Server) {
   const key = getKey(server);
-  let child = spawn('java', ['-Xms2G', '-Xmx4G', '-jar', `${server.location}/server.jar`], { cwd: server.location });
+  let child = spawn('java', ['-Xms2G', '-Xmx4G', '-jar', path.join(server.location, 'server.jar'), '--nogui'], { cwd: server.location });
   servers.push({ key, process: child, status: 'Online'})
 
   child.stdout?.on('data', (data) => {
@@ -32,7 +32,7 @@ export function start(server: Server) {
       try {
         fs.writeFileSync(path.join(server.location, 'eula.txt'), 'eula=true');
         child.kill();
-        child = spawn('java', ['-Xms2G', '-Xmx4G', '-jar', path.join(server.location, 'server.jar')], { cwd: server.location });
+        child = spawn('java', ['-Xms2G', '-Xmx4G', '-jar', path.join(server.location, 'server.jar'), '--nogui'], { cwd: server.location });
       } catch {
         console.error('error writing eula');
         return Response.json({ message: "Failed to write EULA, please write manually" }, { status: 500 });
