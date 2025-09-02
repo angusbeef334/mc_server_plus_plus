@@ -4,10 +4,10 @@ import fs from 'fs'
 import { getServer } from "@/lib/servers";
 import { start, status, stop, log, command } from "@/lib/serverState"
 
-export async function GET(req: Request) {
-  const params = new URL(req.url).searchParams;
-  const action = params.get('action');
-  const server = getServer('angusbeef');
+export async function GET(req: Request, { params }: { params: Promise<{ server: string }> }) {
+  const urlParams = new URL(req.url).searchParams;
+  const action = urlParams.get('action');
+  const server = getServer((await params).server);
 
   if (server == null) {
     return Response.json({ message: "Server does not exist" }, { status: 400 });
