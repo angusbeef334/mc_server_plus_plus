@@ -52,19 +52,18 @@ export function start(server: Server) {
 
   child.on('close', (code) => {
     console.log(`child process exited with code ${code}`);
+    const instance = servers.find(s => s.key === key);
+    servers = servers.filter(s => s.key !== instance?.key);
   });
 }
 
 export function stop(server: Server) {
-  const key = getKey(server);
-  const instance = servers.find(s => s.key === key);
-
   command(server, "stop");
-  servers = servers.filter(s => s.key !== instance?.key);
 }
 
 export function command(server: Server, command: string) {
   const key = getKey(server);
+
   const instance = servers.find(s => s.key === key);
 
   instance?.process.stdin?.write(`${command}\n`, () => {

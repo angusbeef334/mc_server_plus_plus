@@ -25,6 +25,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ server: 
   } else if (action === 'log') {
     const res = log(server);
     return Response.json({ log: res }, { status: 200 });
+  } else {
+    return Response.json({ message: "Invalid action" }, { status: 400 });
   }
 }
 
