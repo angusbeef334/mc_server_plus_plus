@@ -55,7 +55,7 @@ export function stop(server: Server) {
   const instance = servers.find(s => s.key === key);
 
   command(server, "stop\n");
-  servers.filter(s => s.key !== instance?.key);
+  servers = servers.filter(s => s.key !== instance?.key);
 }
 
 export function command(server: Server, command: string) {
