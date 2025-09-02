@@ -113,7 +113,9 @@ export default function ServerView({server}: ServerViewProps) {
             placeholder=">"
             onKeyDown={async (e) => {
               if (e.key === "Enter") {
-                const command = (e.target as HTMLInputElement).value;
+                const target = (e.target as HTMLInputElement);
+                const command = target.value;
+                target.value = '';
                 const res = await fetch(`/api/servers/${server.name}/server`, {
                   method: "POST",
                   body: JSON.stringify({ server, cmd: command })
