@@ -2,7 +2,7 @@ import { downloadPaper } from "@/lib/downloader";
 import path from "path";
 import fs from 'fs'
 import { getServer } from "@/lib/servers";
-import { start, status, stop } from "@/lib/serverState"
+import { start, status, stop, log } from "@/lib/serverState"
 
 export async function GET(req: Request) {
   const params = new URL(req.url).searchParams;
@@ -22,6 +22,9 @@ export async function GET(req: Request) {
   } else if (action == 'status') {
     const res = status(server);
     return Response.json({ status: res }, { status: 200 });
+  } else if (action === 'log') {
+    const res = log(server);
+    return Response.json({ log: res }, { status: 200 });
   }
 }
 

@@ -11,7 +11,7 @@ export default function ServerView({server}: ServerViewProps) {
   useEffect(() => {
     const fetchLog = async () => {
       try {
-        const res = await fetch(`/api/servers/${server.name}/logs/latest`);
+        const res = await fetch(`/api/servers/${server.name}/server?action=log`);
         const data = await res.json();
         setLog(data.log);
       } catch {

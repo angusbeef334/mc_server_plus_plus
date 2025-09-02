@@ -16,7 +16,7 @@ export interface Server {
   plugins: Plugin[];
 }
 
-let servers: { key: string, process: ChildProcess, status: string }[] = [];
+let servers: { key: string, process: ChildProcess, status: string, log: string }[] = [];
 
 function getKey(server: Server) {
   return `${server.name}:${server.location.replaceAll('/', '_')}`;
@@ -25,7 +25,12 @@ function getKey(server: Server) {
 export function start(server: Server) {
   const key = getKey(server);
   let child = spawn('java', ['-Xms2G', '-Xmx4G', '-jar', path.join(server.location, 'server.jar'), '--nogui'], { cwd: server.location });
-  servers.push({ key, process: child, status: 'Online'})
+  servers.push({ key, process: child, status: 'Online', log: ""});
+  const s = servers.find(s => s.key === key);
+  if (s == null) {
+    console.error("failed to push server to servers list");
+    return;
+  }
 
   child.stdout?.on('data', (data) => {
     if ((data as string).includes('You need to agree to the EULA')) {
@@ -38,11 +43,11 @@ export function start(server: Server) {
         return Response.json({ message: "Failed to write EULA, please write manually" }, { status: 500 });
       }
     }
-    console.log(`stdout: ${data}`);
+    s.log += data;
   });
 
   child.stderr?.on('data', (data) => {
-    console.error(`stderr: ${data}`);
+    s.log += data;
   });
 
   child.on('close', (code) => {
@@ -73,4 +78,11 @@ export function status(server: Server) {
 
   if (!instance) return "Offline";
   return instance.status;
+}
+
+export function log(server: Server) {
+  const key = getKey(server);
+  const instance = servers.find(s => s.key === key);
+
+  return instance?.log;
 }
