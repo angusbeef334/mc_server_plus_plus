@@ -26,9 +26,9 @@ export default function ServerView({server}: ServerViewProps) {
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const res = await fetch(`/api/servers/${server.name}/status`);
+        const res = await fetch(`/api/servers/${server.name}/server?action=status`);
         const data = await res.json();
-        setStatus(data.status? "Online" : "Offline");
+        setStatus(data.status);
       } catch {
         setStatus("Offline · Error");
       }

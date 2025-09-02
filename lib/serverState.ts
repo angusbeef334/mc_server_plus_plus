@@ -66,3 +66,11 @@ export function command(server: Server, command: string) {
     console.log(`successfully sent command (${key}): ${command}`);
   })
 }
+
+export function status(server: Server) {
+  const key = getKey(server);
+  const instance = servers.find(s => s.key === key);
+
+  if (!instance) return "Offline";
+  return instance.status;
+}
