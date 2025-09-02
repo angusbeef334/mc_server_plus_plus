@@ -53,11 +53,16 @@ export function start(server: Server) {
 export function stop(server: Server) {
   const key = getKey(server);
   const instance = servers.find(s => s.key === key);
-  console.log(servers);
-  instance?.process.stdin?.write('stop\n', () => {
-    servers.filter(s => s.key !== instance?.key);
-    return Response.json({ message: "Successfully stopped server" }, { status: 200 });
-  });
 
-  return Response.json({ message: "Failed to stop server" }, { status: 500 });
+  command(server, "stop\n");
+  servers.filter(s => s.key !== instance?.key);
+}
+
+export function command(server: Server, command: string) {
+  const key = getKey(server);
+  const instance = servers.find(s => s.key === key);
+
+  instance?.process.stdin?.write(command, () => {
+    console.log(`successfully sent command (${key}): ${command}`);
+  })
 }
