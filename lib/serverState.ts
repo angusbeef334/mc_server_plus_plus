@@ -59,7 +59,7 @@ export function stop(server: Server) {
   const key = getKey(server);
   const instance = servers.find(s => s.key === key);
 
-  command(server, "stop\n");
+  command(server, "stop");
   servers = servers.filter(s => s.key !== instance?.key);
 }
 
@@ -67,7 +67,7 @@ export function command(server: Server, command: string) {
   const key = getKey(server);
   const instance = servers.find(s => s.key === key);
 
-  instance?.process.stdin?.write(command, () => {
+  instance?.process.stdin?.write(`${command}\n`, () => {
     console.log(`successfully sent command (${key}): ${command}`);
   })
 }

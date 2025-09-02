@@ -2,7 +2,7 @@ import { downloadPaper } from "@/lib/downloader";
 import path from "path";
 import fs from 'fs'
 import { getServer } from "@/lib/servers";
-import { start, status, stop, log } from "@/lib/serverState"
+import { start, status, stop, log, command } from "@/lib/serverState"
 
 export async function GET(req: Request) {
   const params = new URL(req.url).searchParams;
@@ -26,6 +26,16 @@ export async function GET(req: Request) {
     const res = log(server);
     return Response.json({ log: res }, { status: 200 });
   }
+}
+
+export async function POST(req: Request) {
+  const { server, cmd } = await req.json();
+  if (!server || !cmd) {
+    return Response.json({ message: "server/plugin param missing" }, { status: 400 });
+  }
+
+  command(server, cmd);
+  return Response.json({ message: "success" }, { status: 200 });
 }
 
 export async function PUT(req: Request) {

@@ -98,14 +98,34 @@ export default function ServerView({server}: ServerViewProps) {
   return (
     <div className="view bg-gray-900">
       <div className="flex flex-row">
-        <textarea
-          readOnly
-          id="textarea-log"
-          ref={textareaRef}
-          className="bg-black w-[50%] h-96"
-          style={{ fontFamily: 'Source Code Pro, monospace' }}
-          value={log}
-        />
+        <div className="flex flex-col w-[60%]">
+          <textarea
+            readOnly
+            id="textarea-log"
+            ref={textareaRef}
+            className="bg-black h-96"
+            style={{ fontFamily: 'Source Code Pro, monospace' }}
+            value={log}
+          />
+          <input
+            type="text"
+            className="bg-gray-800 p-2 rounded-md"
+            placeholder=">"
+            onKeyDown={async (e) => {
+              if (e.key === "Enter") {
+                const command = (e.target as HTMLInputElement).value;
+                const res = await fetch(`/api/servers/${server.name}/server`, {
+                  method: "POST",
+                  body: JSON.stringify({ server, cmd: command })
+                })
+
+                if (!res.ok) {
+                  alert(`Failed to send command: ${res.statusText}`);
+                }
+              }
+            }}
+          />
+        </div>
         <div className="p-4 m-2">
           <h3 className="text-lg font-semibold text-white">Status</h3>
           <label>{status}</label>
