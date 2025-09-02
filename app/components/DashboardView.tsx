@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface ServerViewProps {
   server: any;
@@ -7,10 +7,16 @@ interface ServerViewProps {
 export default function ServerView({server}: ServerViewProps) {
   const [log, setLog] = useState("");
   const [status, setStatus] = useState("Offline")
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const bottomRef = useRef(true);
 
   useEffect(() => {
     const fetchLog = async () => {
       try {
+        const textarea = textareaRef.current;
+        if (textarea) {
+          bottomRef.current = textarea.scrollHeight - textarea.scrollTop - textarea.clientHeight < 5;
+        }
         const res = await fetch(`/api/servers/${server.name}/server?action=log`);
         const data = await res.json();
         setLog(data.log);
@@ -22,6 +28,13 @@ export default function ServerView({server}: ServerViewProps) {
     const interval = setInterval(fetchLog, 2000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea && bottomRef.current) {
+      textarea.scrollTop = textarea.scrollHeight;
+    }
+  }, [log]);
 
   useEffect(() => {
     const fetchStatus = async () => {
@@ -85,7 +98,14 @@ export default function ServerView({server}: ServerViewProps) {
   return (
     <div className="view bg-gray-900">
       <div className="flex flex-row">
-        <textarea readOnly className="bg-black w-[50%] h-96" style={{ fontFamily: 'Source Code Pro, monospace' }} value={log}/>
+        <textarea
+          readOnly
+          id="textarea-log"
+          ref={textareaRef}
+          className="bg-black w-[50%] h-96"
+          style={{ fontFamily: 'Source Code Pro, monospace' }}
+          value={log}
+        />
         <div className="p-4 m-2">
           <h3 className="text-lg font-semibold text-white">Status</h3>
           <label>{status}</label>
