@@ -60,7 +60,7 @@ export default function ServerPage() {
   }
 
   return (
-    <div className="view bg-gray-900">
+    <div className="view bg-gray-900 max-w-[100%]">
       <header className="flex flex-row items-center justify-between p-2">
         <div className="flex flex-row items-center">
           <Link href="/servers">

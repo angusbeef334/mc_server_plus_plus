@@ -99,14 +99,14 @@ export default function ServerView({server}: ServerViewProps) {
   }
 
   return (
-    <div className="view bg-gray-900 min-h-screen">
-      <div className="flex flex-row">
-        <div className="flex flex-col w-[70%]">
+    <div className="view bg-gray-900 min-h-screen h-screen w-[90%] overflow-hidden">
+      <div className="flex flex-row h-[90%]">
+        <div className="flex flex-col w-[70%] h-[80%]">
           <pre
             id="textarea-log"
             ref={textareaRef}
-            className="bg-black h-96 overflow-auto min-h-[100%]"
-            style={{ fontFamily: 'Source Code Pro, monospace' }}
+            className="bg-black overflow-auto"
+            style={{ fontFamily: 'Source Code Pro, monospace', height: '90%' }}
             dangerouslySetInnerHTML={{ __html: ansiUp.ansi_to_html(log) }}
           />
           <input
@@ -130,7 +130,7 @@ export default function ServerView({server}: ServerViewProps) {
             }}
           />
         </div>
-        <div className="p-4 m-2">
+        <div className="p-4 m-2 flex flex-col justify-start h-full">
           <h3 className="text-lg font-semibold text-white">Status</h3>
           <label>{status}</label>
           <button 
