@@ -58,7 +58,8 @@ export function start(server: Server) {
   });
 }
 
-export function stop(server: Server) {
+export async function stop(server: Server) {
+  await new Promise(resolve => setTimeout(resolve, 2000)); // wait for last log to get sent
   command(server, "stop");
 }
 
