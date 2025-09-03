@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { AnsiUp } from 'ansi_up';
 
 interface ServerViewProps {
   server: any;
@@ -7,8 +8,10 @@ interface ServerViewProps {
 export default function ServerView({server}: ServerViewProps) {
   const [log, setLog] = useState("");
   const [status, setStatus] = useState("Offline")
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const textareaRef = useRef<HTMLPreElement | null>(null);
   const bottomRef = useRef(true);
+
+  const ansiUp = new AnsiUp();
 
   useEffect(() => {
     const fetchLog = async () => {
@@ -96,16 +99,15 @@ export default function ServerView({server}: ServerViewProps) {
   }
 
   return (
-    <div className="view bg-gray-900">
+    <div className="view bg-gray-900 min-h-screen">
       <div className="flex flex-row">
-        <div className="flex flex-col w-[60%]">
-          <textarea
-            readOnly
+        <div className="flex flex-col w-[70%]">
+          <pre
             id="textarea-log"
             ref={textareaRef}
-            className="bg-black h-96"
+            className="bg-black h-96 overflow-auto min-h-[100%]"
             style={{ fontFamily: 'Source Code Pro, monospace' }}
-            value={log}
+            dangerouslySetInnerHTML={{ __html: ansiUp.ansi_to_html(log) }}
           />
           <input
             type="text"
