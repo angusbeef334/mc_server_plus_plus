@@ -1,6 +1,7 @@
 import { ChildProcess, spawn } from "child_process"
 import fs from "fs"
 import path from "path";
+import { getProperties } from "properties-file";
 
 export interface Plugin {
   name: string;
@@ -84,4 +85,9 @@ export function log(server: Server) {
   const instance = servers.find(s => s.key === key);
 
   return instance?.log;
+}
+
+export function properties(server: Server) {
+  const res = fs.readFileSync(path.join(server.location, 'server.properties'));
+  return getProperties(res.toString());
 }
