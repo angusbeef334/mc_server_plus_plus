@@ -22,7 +22,7 @@ export default function ServerView({server}: ServerViewProps) {
         }
         const res = await fetch(`/api/servers/${server.name}/server?action=log`);
         const data = await res.json();
-        setLog(data.log);
+        if (data.log) setLog(data.log);
       } catch {
         setLog("Failed to load log");
       }
