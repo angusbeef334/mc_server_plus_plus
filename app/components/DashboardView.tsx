@@ -99,9 +99,9 @@ export default function ServerView({server}: ServerViewProps) {
   }
 
   return (
-    <div className="view bg-gray-900 min-h-screen h-screen w-[90%] overflow-hidden">
+    <div className="view bg-gray-900 w-[100%] overflow-hidden">
       <div className="flex flex-row h-[90%]">
-        <div className="flex flex-col w-[70%] h-[80%]">
+        <div className="flex flex-col h-150 w-[70%]">
           <pre
             id="textarea-log"
             ref={textareaRef}

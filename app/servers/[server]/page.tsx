@@ -60,7 +60,7 @@ export default function ServerPage() {
   }
 
   return (
-    <div className="view bg-gray-900 max-w-[100%]">
+    <div className="view bg-gray-900 min-h-screen w-full">
       <header className="flex flex-row items-center justify-between p-2">
         <div className="flex flex-row items-center">
           <Link href="/servers">
@@ -83,7 +83,7 @@ export default function ServerPage() {
         <span className="text-xl text-white m-2">{server.name}</span>
       </header>
 
-      <div className="flex flex-row">
+      <div className="flex flex-row min-h-0 flex-grow min-h-[100vh]">
         <nav className="flex flex-col p-2">
           {[
             "Dashboard",
@@ -102,7 +102,7 @@ export default function ServerPage() {
             </button>
           ))}
         </nav>
-        <div className="w-full">
+        <div className="w-full flex-grow min-h-0 overflow-hidden">
           {activeView == 'dashboard' && (
             <DashboardView server={server}/>
           )}
