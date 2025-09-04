@@ -11,6 +11,7 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
   const [server, setServer] = useState(JSON.parse(serverData));
   const [versions, setVersions] = useState<any[]>([]);
   const [properties, setProperties] = useState<any[]>([]);
+  const [tempProps, setTempProps] = useState<any[]>([]);
   const [serverStatus, setServerStatus] = useState<{updating?: boolean; msg?: string, err?: string}>({});
   const [propsOpen, setPropsOpen] = useState(false);
 
@@ -134,13 +135,15 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
         <label>Location: {server.location}</label>
 
         <h3 className="text-lg text-white font-semibold">Properties</h3>
-
-        <button 
-          className="bg-gray-800 hover:bg-gray-700 rounded-md p-2 m-1 w-min"
-          onClick={() => setPropsOpen(true)}
-        >
-          Edit
-        </button>
+        <div className="flex flex-row items-center">
+          <button 
+            className="bg-gray-800 hover:bg-gray-700 rounded-md p-2 m-1 w-min"
+            onClick={() => {setTempProps(properties); setPropsOpen(true);}}
+          >
+            Edit
+          </button>
+          <label className="p-2">Change the values in the server.properties file</label>
+        </div>
       </div>
       {propsOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -169,13 +172,27 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
               {Object.entries(properties).map(([key, value]) => (
                 <div key={key} className="flex flex-row p-1 items-center">
                   <span>{key}: </span>
-                  <input type="text" className="p-1 m-1 bg-gray-700 rounded-sm" defaultValue={value}/>
+                  <input 
+                    type="text" 
+                    id={`${key}-input`}
+                    onChange={(e) => {
+                      setTempProps(prev => ({
+                        ...prev,
+                        [key]: e.target.value
+                      }));
+                    }}
+                    className="p-1 m-1 bg-gray-700 rounded-sm"
+                    defaultValue={value}
+                  />
                 </div>
               ))}
             </div>
             <button
               className="bg-blue-700 p-2 rounded-md"
-              onClick={() => setPropsOpen(false)}
+              onClick={() => {
+                setProperties(tempProps); 
+                setPropsOpen(false);
+              }}
             >
               Save
             </button>
