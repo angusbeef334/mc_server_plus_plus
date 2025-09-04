@@ -112,6 +112,7 @@ export default function ServerView({server}: ServerViewProps) {
           <input
             type="text"
             className="bg-gray-800 p-2 rounded-md"
+            disabled={status !== "Online"}
             placeholder=">"
             onKeyDown={async (e) => {
               if (e.key === "Enter") {
