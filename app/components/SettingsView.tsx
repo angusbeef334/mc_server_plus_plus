@@ -41,7 +41,15 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
     } catch (err: any) {
       setServerStatus({ updating: false, err: err?.message || 'unknown error'})
     }
-  }
+  };
+
+  const convertProps = (keyValueProps: any[]) => {
+    let ret = "";
+    {Object.entries(keyValueProps).map(([key, value]) => {
+        ret += `${key}: ${value}\n`
+    })};
+    return ret;
+  };
 
   useEffect(() => {
     const getVersions = async () => {
@@ -73,14 +81,14 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
       }
     }
     getProperties();
-  }, [])
+  }, []);
 
   const handleVersionChange = async () => {
     const version = (document.getElementById('in-version') as HTMLInputElement).value;
     const res = await fetch(`/api/servers/${server.name}/server`, {
       method: "PATCH",
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({server: server, version: version })
+      body: JSON.stringify({server: server, param: version })
     });
 
     if (!res.ok) {
@@ -92,7 +100,7 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
     setServer(newServer);
     onServerUpdate(newServer);
     handleServerUpdate();
-  }
+  };
 
   return (
     <div className="view">
@@ -189,8 +197,14 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
             </div>
             <button
               className="bg-blue-700 p-2 rounded-md"
-              onClick={() => {
-                setProperties(tempProps); 
+              onClick={async () => {
+                const props = convertProps(tempProps);
+                const res = await fetch(`/api/servers/${server.name}/server`, {
+                  method: "PATCH",
+                  body: JSON.stringify({server, param: props, action: "properties"})
+                });
+                if (!res.ok) alert("Failed to set new props");
+                else setProperties(tempProps);
                 setPropsOpen(false);
               }}
             >

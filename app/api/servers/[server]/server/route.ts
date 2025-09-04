@@ -68,29 +68,44 @@ export async function PUT(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const body = await req.json();
-  const { server, version } = body;
+  const { server, param, action } = await req.json();
 
-  if (typeof server !== "object" || typeof version !== "string") {
+  if (typeof server !== "object" || typeof param !== "string") {
     return Response.json({ error: "Invalid params" }, { status: 400 });
   }
 
-  try {
-    const dataPath = path.join(process.cwd(), 'data', 'servers.json');
-    if (fs.existsSync(dataPath)) {
-      const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
-      if (Array.isArray(data)) {
-        const i = data.findIndex((s: any) => s.name === server.name);
-        if (i !== -1) {
-          data[i].version = version;
-          fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
-        } else {
-          return Response.json({ error: "Server does not exist" }, { status: 500 });
+  if (!action || action === "version") {
+    try {
+      const dataPath = path.join(process.cwd(), 'data', 'servers.json');
+      if (fs.existsSync(dataPath)) {
+        const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
+        if (Array.isArray(data)) {
+          const i = data.findIndex((s: any) => s.name === server.name);
+          if (i !== -1) {
+            data[i].version = param;
+            fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+          } else {
+            return Response.json({ error: "Server does not exist" }, { status: 500 });
+          }
         }
       }
+      return Response.json({ message: "Version updated" }, { status: 200 });
+    } catch (err) {
+      return Response.json({ error: "Failed to update version", details: String(err) }, { status: 500 });
     }
-    return Response.json({ message: "Version updated" });
-  } catch (err) {
-    return Response.json({ error: "Failed to update version", details: String(err) }, { status: 500 });
+  } else if (action === "properties") {
+    try {
+      const propsPath = path.join(server.location, 'server.properties');
+      if (fs.existsSync(propsPath)) {
+        fs.writeFileSync(propsPath, param);
+      } else {
+        return Response.json({ error: "server.properties file does not exist" }, { status: 500 });
+      }
+    } catch (err) {
+      return Response.json({ error: "Failed to update properties", details: String(err)}, { status: 500 });
+    }
+    return Response.json({ message: "Props updated" }, { status: 200 });
+  } else {
+    return Response.json({ error: "invalid action" }, { status: 400 });
   }
 }
