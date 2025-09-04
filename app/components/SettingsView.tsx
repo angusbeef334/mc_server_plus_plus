@@ -10,7 +10,9 @@ interface SettingsCardProps {
 export default function SettingsView({ serverData, onServerUpdate }: SettingsCardProps) {
   const [server, setServer] = useState(JSON.parse(serverData));
   const [versions, setVersions] = useState<any[]>([]);
+  const [properties, setProperties] = useState<any[]>([]);
   const [serverStatus, setServerStatus] = useState<{updating?: boolean; msg?: string, err?: string}>({});
+  const [propsOpen, setPropsOpen] = useState(false);
 
   const handleServerUpdate = async () => {
     try {
@@ -56,6 +58,22 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
     getVersions();
   }, []);
 
+  useEffect(() => {
+    const getProperties = async () => {
+      try {
+        const res = await fetch(
+          `/api/servers/${server.name}/server?action=properties`
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        setProperties(data.log);
+      } catch (e) {
+        console.error("failed to fetch properties", e)
+      }
+    }
+    getProperties();
+  }, [])
+
   const handleVersionChange = async () => {
     const version = (document.getElementById('in-version') as HTMLInputElement).value;
     const res = await fetch(`/api/servers/${server.name}/server`, {
@@ -79,6 +97,7 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
     <div className="view">
       <div className="flex flex-col">
         <h3 className="text-lg text-white font-semibold">Server</h3>
+
         <label>Minecraft: {server.version}</label>
         <section className="flex flex-row items-center">
           {versions.length === 0 && (
@@ -113,7 +132,47 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
           {server.software}: {server.build}
         </label>
         <label>Location: {server.location}</label>
+
+        <h3 className="text-lg text-white font-semibold">Properties</h3>
+
+        <button 
+          className="bg-gray-800 hover:bg-gray-700 rounded-md p-2 m-1 w-min"
+          onClick={() => setPropsOpen(true)}
+        >
+          Edit
+        </button>
       </div>
+      {propsOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 rounded-lg shadow-xl max-h-[75vh] p-4 sm:p-6 w-full max-w-md overflow-auto relative border border-gray-700 mx-2">
+            <button
+              onClick={() => setPropsOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+            <h2 className="text-lg sm:text-xl mb-4 text-white">Server Properties</h2>
+            {Object.entries(properties).map(([key, value]) => (
+              <div key={key}>
+                <span>{key}: {value as String}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
