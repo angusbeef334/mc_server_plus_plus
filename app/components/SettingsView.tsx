@@ -144,7 +144,7 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
       </div>
       {propsOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-lg shadow-xl max-h-[75vh] p-4 sm:p-6 w-full max-w-md overflow-auto relative border border-gray-700 mx-2">
+          <div className="bg-gray-800 rounded-lg shadow-xl max-h-[75vh] p-4 sm:p-6 w-full max-w-md relative border border-gray-700 mx-2">
             <button
               onClick={() => setPropsOpen(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-white"
@@ -165,11 +165,20 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
               </svg>
             </button>
             <h2 className="text-lg sm:text-xl mb-4 text-white">Server Properties</h2>
-            {Object.entries(properties).map(([key, value]) => (
-              <div key={key}>
-                <span>{key}: {value as String}</span>
-              </div>
-            ))}
+            <div className="overflow-auto max-h-[50vh] relative">
+              {Object.entries(properties).map(([key, value]) => (
+                <div key={key} className="flex flex-row p-1 items-center">
+                  <span>{key}: </span>
+                  <input type="text" className="p-1 m-1 bg-gray-700 rounded-sm" defaultValue={value}/>
+                </div>
+              ))}
+            </div>
+            <button
+              className="bg-blue-700 p-2 rounded-md"
+              onClick={() => setPropsOpen(false)}
+            >
+              Save
+            </button>
           </div>
         </div>
       )}
