@@ -14,6 +14,7 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
   const [tempProps, setTempProps] = useState<any[]>([]);
   const [serverStatus, setServerStatus] = useState<{updating?: boolean; msg?: string, err?: string}>({});
   const [propsOpen, setPropsOpen] = useState(false);
+  const [mappings, setMappings] = useState<any>();
 
   const handleServerUpdate = async () => {
     try {
@@ -83,6 +84,22 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
     getProperties();
   }, []);
 
+  useEffect(() => {
+    const fetchMappings = async () => {
+      try {
+        const res = await fetch(`/api/servers/${server.name}/server?action=mappings`);
+        if (!res.ok) {
+          console.error(`failed to fetch props mappings: ${res.statusText}`);
+        }
+
+        setMappings(JSON.parse((await res.json()).mapping));
+      } catch (e) {
+        console.error(`failed to fetch props mappings: ${e}`)
+      }
+    }
+    fetchMappings();
+  }, []);
+
   const handleVersionChange = async () => {
     const version = (document.getElementById('in-version') as HTMLInputElement).value;
     const res = await fetch(`/api/servers/${server.name}/server`, {
@@ -146,7 +163,7 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
         <div className="flex flex-row items-center">
           <button 
             className="bg-gray-800 hover:bg-gray-700 rounded-md p-2 m-1 w-min"
-            onClick={() => {setTempProps(properties); setPropsOpen(true);}}
+            onClick={() => {setTempProps(properties); setPropsOpen(true)}}
           >
             Edit
           </button>
@@ -179,7 +196,7 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
             <div className="overflow-auto max-h-[50vh] relative">
               {Object.entries(properties).map(([key, value]) => (
                 <div key={key} className="flex flex-row p-1 items-center">
-                  <span>{key}: </span>
+                  <span>{mappings && mappings[key] ? mappings[key][1] : key}:</span>
                   <input 
                     type="text" 
                     id={`${key}-input`}

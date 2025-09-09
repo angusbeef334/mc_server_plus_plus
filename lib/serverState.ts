@@ -92,3 +92,7 @@ export function properties(server: Server) {
   const res = fs.readFileSync(path.join(server.location, 'server.properties'));
   return getProperties(res.toString());
 }
+
+export function mappings() {
+  return fs.readFileSync(path.join(process.cwd(), 'data', 'props.json')).toString();
+}
