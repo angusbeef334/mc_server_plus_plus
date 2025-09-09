@@ -5,6 +5,7 @@
   "broadcast-console-to-ops": ["bool", "Broadcast console to ops", "Whether to broadcast server console output to online operators"],
   "broadcast-rcon-to-ops": ["bool", "Broadcast rcon to ops", "Whether to broadcast rcon messages to online operators"],
   "bug-report-link": ["str", "Bug report link", "URL for report_bug server link, empty = not shown"],
+  "debug": ["bool", "Enable debug mode", "Whether to enable debug mode"],
   "difficulty": ["str", "Difficulty", "The default game difficulty mode for players"],
   "enable-code-of-conduct": ["bool", "Enable code of conduct", "Whether a code of conduct for the server will be read from the codeofconduct subfolder in the server.properties folder"],
   "enable-command-block": ["bool", "Enable command blocks", "Whether command blocks are enabled"],
