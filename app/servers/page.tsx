@@ -6,8 +6,28 @@ import { ServersGrid } from "../components/ServersGrid";
 export default function Server() {
   const [addOpen, setAddOpen] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    const name = (document.getElementById('in-name') as HTMLInputElement).value
+    const directory = (document.getElementById('in-dir') as HTMLInputElement).value
+
+    const server = {
+      "name": name,
+      "location": directory,
+      "software": "paper",
+      "version": "",
+      "build": "0",
+      "plugins": []
+    };
+
+    const res = await fetch(`/api/servers/SErver/server`, {
+      method: "PATCH",
+      body: JSON.stringify({server, param: '', action: 'add'})
+    })
+
+    if (!res.ok) alert(`Error adding server: ${(await res.json()).error}`);
+
     setAddOpen(false);
   };
 
@@ -43,8 +63,8 @@ export default function Server() {
             </button>
             <h2 className="text-lg sm:text-xl mb-4 text-white">Add Server</h2>
             <form onSubmit={handleSubmit} className="flex flex-col items-center">
-              <input type="text" className="bg-gray-700 m-1 p-2 rounded-md w-full" placeholder="Name"/>
-              <input type="text" className="bg-gray-700 m-1 p-2 rounded-md w-full" placeholder="Directory"/>
+              <input type="text" id="in-name" className="bg-gray-700 m-1 p-2 rounded-md w-full" placeholder="Name" required/>
+              <input type="text" id="in-dir" className="bg-gray-700 m-1 p-2 rounded-md w-full" placeholder="Directory" required/>
               <input type="submit" className="bg-blue-600 m-1 p-2 rounded-md w-min" value="Add"/>
             </form>
           </div>
