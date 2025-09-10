@@ -108,6 +108,20 @@ export async function PATCH(req: Request) {
       return Response.json({ error: "Failed to update properties", details: String(err)}, { status: 500 });
     }
     return Response.json({ message: "Props updated" }, { status: 200 });
+  } else if (action === "add") {
+    try {
+      const dataPath = path.join(process.cwd(), 'data', 'servers.json');
+      if (fs.existsSync(dataPath)) {
+        const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+        if (Array.isArray(data)) {
+          data.push(server);
+          fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+        }
+      }
+      return Response.json({ message: "Successfully added server " }, { status: 200 });
+    } catch (e) {
+      return Response.json({ error: "Failed to add server" }, { status: 500 });
+    }
   } else {
     return Response.json({ error: "invalid action" }, { status: 400 });
   }
