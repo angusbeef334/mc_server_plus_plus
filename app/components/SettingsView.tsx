@@ -196,9 +196,9 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
             <div className="overflow-auto max-h-[50vh] relative">
               {Object.entries(properties).map(([key, value]) => (
                 <div key={key} className="flex flex-row p-1 items-center">
-                  <span>{mappings && mappings[key] ? mappings[key][1] : key}:</span>
+                  <span className="cursor-help" title={mappings[key][2]}>{mappings[key][1]}:</span>
                   <input 
-                    type="text" 
+                    type={mappings[key][0] === 'bool' ? 'checkbox' : mappings[key][0] === 'int'? 'number' : 'text'} 
                     id={`${key}-input`}
                     onChange={(e) => {
                       setTempProps(prev => ({
