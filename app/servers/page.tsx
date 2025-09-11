@@ -10,6 +10,8 @@ export default function Server() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setAddErr('');
+    setAddMsg('');
 
     const name = (document.getElementById('in-name') as HTMLInputElement).value
     const directory = (document.getElementById('in-dir') as HTMLInputElement).value

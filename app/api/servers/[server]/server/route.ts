@@ -111,11 +111,14 @@ export async function PATCH(req: Request) {
   } else if (action === "add") {
     try {
       if (!fs.existsSync(server.location)) return Response.json({ error: "Directory does not exist" }, { status: 404 });
-      
+
       const dataPath = path.join(process.cwd(), 'data', 'servers.json');
       if (fs.existsSync(dataPath)) {
         const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
         if (Array.isArray(data)) {
+          if (data.filter(s => s.name === server.name).length !== 0) return Response.json({ error: "Server already exists with same name" }, { status: 400 });
+          if (data.filter(s => s.location === server.location).length !== 0) return Response.json({ error: "Server already exists with same location" }, { status: 400 });
+          
           data.push(server);
           fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
         }
