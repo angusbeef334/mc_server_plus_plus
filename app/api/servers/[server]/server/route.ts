@@ -131,3 +131,25 @@ export async function PATCH(req: Request) {
     return Response.json({ error: "invalid action" }, { status: 400 });
   }
 }
+
+export async function DELETE(req: Request) {
+  const { server } = await req.json();
+
+  if (typeof server !== "object") {
+    return Response.json({ error: "Invalid params" }, { status: 400 });
+  }
+
+  try {
+    const dataPath = path.join(process.cwd(), 'data', 'servers.json');
+    if (fs.existsSync(dataPath)) {
+      let data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
+      if (Array.isArray(data)) {
+        data = data.filter(s => s.name !== server.name);
+        fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+      }
+    }
+    return Response.json({ message: "Successfully deleted server" }, { status: 200 });
+  } catch (e) {
+    return Response.json({ error: `Failed to delete server: ${e}`}, { status: 500 });
+  }
+}
