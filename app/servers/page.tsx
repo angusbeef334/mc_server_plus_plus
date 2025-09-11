@@ -1,11 +1,28 @@
 'use client'
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { ServersGrid } from "../components/ServersGrid";
 
 export default function Server() {
   const [addOpen, setAddOpen] = useState(false);
   const [addErr, setAddErr] = useState('');
+  const [versions, setVersions] = useState<any[]>([]);
+
+  useEffect(() => {
+    const getVersions = async () => {
+      try {
+        const res = await fetch(
+          "https://fill.papermc.io/v3/projects/paper/versions"
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        setVersions(data.versions || []);
+      } catch (e) {
+        console.error("failed to fetch versions", e);
+      }
+    };
+    getVersions();
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -14,12 +31,13 @@ export default function Server() {
     const name = (document.getElementById('in-name') as HTMLInputElement).value;
     const directory = (document.getElementById('in-dir') as HTMLInputElement).value;
     const software = (document.getElementById('in-software') as HTMLInputElement).value;
+    const version = (document.getElementById('in-version') as HTMLInputElement).value;
 
     const server = {
       "name": name,
       "location": directory,
       "software": software,
-      "version": "",
+      "version": version,
       "build": "0",
       "plugins": []
     };
@@ -72,6 +90,13 @@ export default function Server() {
                 <option value="spigot" disabled>Spigot</option>
                 <option value="forge" disabled>Forge</option>
                 <option value="fabric" disabled>Fabric</option>
+              </select>
+              <select id="in-version" className="bg-gray-700 m-1 rounded-md w-full py-2 px-1" required>
+                {versions.map((version) => (
+                  <option key={version.version.id} value={version.version.id} className="text-sm text-gray-300">
+                    {version.version.id}
+                  </option>
+                ))}
               </select>
               <input type="submit" className="bg-blue-600 m-1 p-2 rounded-md w-min" value="Add"/>
             </form>
