@@ -10,6 +10,9 @@ interface ServerCardProps {
 export default function ServerCard({name, id}: ServerCardProps) {
   const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+
+    if (!confirm('Really delete server?')) return;
+
     const server = {
       "name": name
     }

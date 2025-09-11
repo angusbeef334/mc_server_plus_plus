@@ -34,17 +34,17 @@ export function start(server: Server) {
   }
 
   child.stdout?.on('data', (data) => {
+    s.log += data;
     if ((data as string).includes('You need to agree to the EULA')) {
       try {
         fs.writeFileSync(path.join(server.location, 'eula.txt'), 'eula=true');
         child.kill();
-        child = spawn('java', ['-Xms2G', '-Xmx4G', '-jar', path.join(server.location, 'server.jar'), '--nogui'], { cwd: server.location });
+        s.log += "EULA was written, restart server\n";
       } catch {
         console.error('error writing eula');
         return Response.json({ message: "Failed to write EULA, please write manually" }, { status: 500 });
       }
     }
-    s.log += data;
   });
 
   child.stderr?.on('data', (data) => {
