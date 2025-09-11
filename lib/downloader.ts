@@ -15,7 +15,7 @@ export interface Plugin {
  * @param output output path of the downloaded plugin
  * @returns string: new/current version if download successful/no new ver, empty if download failed, -2 if plugin is external (can't directly download)
  */
-export async function downloadSpigot(name: string, version: string, id: string, output: string): Promise<string> {
+export async function downloadSpigot(name: string, version: string, id: string, output: string, server: string): Promise<string> {
   const url = `https://api.spiget.org/v2/resources/${id}`;
   
   try {
@@ -44,7 +44,7 @@ export async function downloadSpigot(name: string, version: string, id: string, 
           const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
 
           if (Array.isArray(data)) {
-            const i = data.findIndex(server => server.plugins.some((plugin: { name: string }) => plugin.name === name));
+            const i = data.findIndex(server => server.name === server);
             if (i !== -1) {
               const j = data[i].plugins.findIndex((plugin: { name: string }) => plugin.name === name);
               if (j !== -1) {
@@ -92,7 +92,7 @@ export async function downloadSpigot(name: string, version: string, id: string, 
  * @param output output path of downloaded plugin
  * @returns string: empty if download failed, otherwise the new version
  */
-export async function downloadGithub(name: string, version: string, repo: string, output: string): Promise<string> {
+export async function downloadGithub(name: string, version: string, repo: string, output: string, server: string): Promise<string> {
   try {
     const res = await fetch(`https://api.github.com/repos/${repo}/releases/latest`, {
       headers: {
@@ -128,7 +128,7 @@ export async function downloadGithub(name: string, version: string, repo: string
 
           if (Array.isArray(data)) {
             //server
-            const i = data.findIndex(server => server.plugins.some((plugin: { name: string }) => plugin.name === name));
+            const i = data.findIndex(server => server.name === server);
             if (i !== -1) {
               //plugin
               const j = data[i].plugins.findIndex((plugin: { name: string }) => plugin.name === name);
@@ -172,7 +172,7 @@ export async function downloadGithub(name: string, version: string, repo: string
  * @param output output path of the downloaded plugin
  * @returns string: new/current version if download successful/no new ver, empty if download failed, -2 if plugin is external (can't directly download)
  */
-export async function downloadHangar(name: string, version: string, software: string, id: string, output: string): Promise<string> {
+export async function downloadHangar(name: string, version: string, software: string, id: string, output: string, server: string): Promise<string> {
   const url = `https://hangar.papermc.io/api/v1/projects/${id}/versions`;
 
   try {
@@ -192,7 +192,7 @@ export async function downloadHangar(name: string, version: string, software: st
 
         if (Array.isArray(data)) {
           //server
-          const i = data.findIndex(server => server.plugins.some((plugin: { name: string }) => plugin.name === name));
+          const i = data.findIndex(server => server.name === name);
           if (i !== -1) {
             //plugin
             const j = data[i].plugins.findIndex((plugin: { name: string }) => plugin.name === name);
@@ -241,7 +241,7 @@ export async function downloadBukkit(name: string, version: string, id: string, 
  * @param output the output path of the downloaded software
  * @returns string: new version if download successful else blank string
  */
-export async function downloadPaper(paperVer: string, mcVer: string, output: string): Promise<string> {
+export async function downloadPaper(paperVer: string, mcVer: string, output: string, name: string): Promise<string> {
   const location = `https://fill.papermc.io/v3/projects/paper/versions/${mcVer}/builds`
   try {
     const res = await fetch(location);
@@ -276,7 +276,7 @@ export async function downloadPaper(paperVer: string, mcVer: string, output: str
           const data = JSON.parse(fs.readFileSync(servers, "utf-8"));
 
           if (Array.isArray(data)) {
-            const serverIndex = data.findIndex(server => server.software === 'paper' && server.version === mcVer);
+            const serverIndex = data.findIndex(server => server.name === name);
             if (serverIndex !== -1) {
               data[serverIndex].build = build.toString();
               fs.writeFileSync(servers, JSON.stringify(data, null, 2), "utf-8");

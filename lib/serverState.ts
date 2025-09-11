@@ -51,7 +51,8 @@ export function start(server: Server) {
     s.log += data;
   });
 
-  child.on('close', (code) => {
+  child.on('close', async (code) => {
+    await new Promise(resolve => setTimeout(resolve, 2000)); // wait for last log to get sent
     console.log(`child process exited with code ${code}`);
     const instance = servers.find(s => s.key === key);
     servers = servers.filter(s => s.key !== instance?.key);

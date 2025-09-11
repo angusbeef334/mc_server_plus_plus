@@ -57,7 +57,7 @@ export async function PUT(req: Request) {
   try {
     const output = path.join(server.location, 'server.jar');
     let success = false;
-    let newVersion = await downloadPaper(build, server.version, output);
+    let newVersion = await downloadPaper(build, server.version, output, server.name);
     success = !!newVersion;
     
     if (success) {
