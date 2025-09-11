@@ -11,13 +11,14 @@ export default function Server() {
     e.preventDefault();
     setAddErr('');
 
-    const name = (document.getElementById('in-name') as HTMLInputElement).value
-    const directory = (document.getElementById('in-dir') as HTMLInputElement).value
+    const name = (document.getElementById('in-name') as HTMLInputElement).value;
+    const directory = (document.getElementById('in-dir') as HTMLInputElement).value;
+    const software = (document.getElementById('in-software') as HTMLInputElement).value;
 
     const server = {
       "name": name,
       "location": directory,
-      "software": "paper",
+      "software": software,
       "version": "",
       "build": "0",
       "plugins": []
@@ -66,6 +67,12 @@ export default function Server() {
             <form onSubmit={handleSubmit} className="flex flex-col">
               <input type="text" id="in-name" className="bg-gray-700 m-1 p-2 rounded-md w-full" placeholder="Name" required/>
               <input type="text" id="in-dir" className="bg-gray-700 m-1 p-2 rounded-md w-full" placeholder="Directory" required/>
+              <select id="in-software" className="bg-gray-700 m-1 rounded-md w-full py-2 px-1" required>
+                <option value="paper">PaperMC</option>
+                <option value="spigot" disabled>Spigot</option>
+                <option value="forge" disabled>Forge</option>
+                <option value="fabric" disabled>Fabric</option>
+              </select>
               <input type="submit" className="bg-blue-600 m-1 p-2 rounded-md w-min" value="Add"/>
             </form>
             {addErr && (
