@@ -5,6 +5,8 @@ import { ServersGrid } from "../components/ServersGrid";
 
 export default function Server() {
   const [addOpen, setAddOpen] = useState(false);
+  const [addErr, setAddErr] = useState('');
+  const [addMsg, setAddMsg] = useState('');
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -24,11 +26,10 @@ export default function Server() {
     const res = await fetch(`/api/servers/SErver/server`, {
       method: "PATCH",
       body: JSON.stringify({server, param: '', action: 'add'})
-    })
+    });
 
-    if (!res.ok) alert(`Error adding server: ${(await res.json()).error}`);
-
-    setAddOpen(false);
+    if (!res.ok) setAddErr(`Error adding server: ${(await res.json()).error}`);
+    else setAddMsg('Successfully added server');
   };
 
   return (
@@ -62,11 +63,17 @@ export default function Server() {
               </svg>
             </button>
             <h2 className="text-lg sm:text-xl mb-4 text-white">Add Server</h2>
-            <form onSubmit={handleSubmit} className="flex flex-col items-center">
+            <form onSubmit={handleSubmit} className="flex flex-col">
               <input type="text" id="in-name" className="bg-gray-700 m-1 p-2 rounded-md w-full" placeholder="Name" required/>
               <input type="text" id="in-dir" className="bg-gray-700 m-1 p-2 rounded-md w-full" placeholder="Directory" required/>
               <input type="submit" className="bg-blue-600 m-1 p-2 rounded-md w-min" value="Add"/>
             </form>
+            {addErr && (
+              <label className="text-red-500">{addErr}</label>
+            )}
+            {addMsg && (
+              <label className="text-green-500">{addMsg}</label>
+            )}
           </div>
         </div>
       )}
