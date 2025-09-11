@@ -6,12 +6,10 @@ import { ServersGrid } from "../components/ServersGrid";
 export default function Server() {
   const [addOpen, setAddOpen] = useState(false);
   const [addErr, setAddErr] = useState('');
-  const [addMsg, setAddMsg] = useState('');
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setAddErr('');
-    setAddMsg('');
 
     const name = (document.getElementById('in-name') as HTMLInputElement).value
     const directory = (document.getElementById('in-dir') as HTMLInputElement).value
@@ -31,7 +29,7 @@ export default function Server() {
     });
 
     if (!res.ok) setAddErr(`Error adding server: ${(await res.json()).error}`);
-    else setAddMsg('Successfully added server');
+    else location.reload();
   };
 
   return (
@@ -72,9 +70,6 @@ export default function Server() {
             </form>
             {addErr && (
               <label className="text-red-500">{addErr}</label>
-            )}
-            {addMsg && (
-              <label className="text-green-500">{addMsg}</label>
             )}
           </div>
         </div>
