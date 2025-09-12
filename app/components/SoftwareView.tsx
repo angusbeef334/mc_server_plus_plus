@@ -66,6 +66,33 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
     onPluginsUpdate(newPlugins);
   }
 
+  const handleRemovePlugin = async (plugin: any) => {
+    if (!confirm(`Remove ${plugin.name}?`)) return;
+    try {
+      setPluginStatus(plugin.name, { removing: true, err: undefined, msg: undefined });
+      
+      const res = await fetch(`/api/servers/${server.name}/plugins`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ server, plugin: plugin.name }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'unknown error');
+      }
+
+      setPluginStatus(plugin.name, { removing: false, err: undefined, msg: undefined })
+
+      const newPlugins = plugins.filter((p) => p.name !== plugin.name);
+      
+      setPlugins(newPlugins); 
+      onPluginsUpdate(newPlugins);
+    } catch (e: any) {
+      setPluginStatus(plugin.name, { err: e?.message || String(e), removing: false });
+    }
+  };
+
   const handlePluginUpdate = async (plugin: any) => {
     try {
       setPluginStatus(plugin.name, { updating: true, err: undefined, msg: undefined });
@@ -123,33 +150,6 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
       setServerStatus({ updating: false, err: err?.message || 'unknown error'})
     }
   }
-
-  const handleRemove = async (plugin: any) => {
-    if (!confirm(`Remove ${plugin.name}?`)) return;
-    try {
-      setPluginStatus(plugin.name, { removing: true, err: undefined, msg: undefined });
-      
-      const res = await fetch(`/api/servers/${server.name}/plugins`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ server, plugin: plugin.name }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'unknown error');
-      }
-
-      setPluginStatus(plugin.name, { removing: false, err: undefined, msg: undefined })
-
-      const newPlugins = plugins.filter((p) => p.name !== plugin.name);
-      
-      setPlugins(newPlugins); 
-      onPluginsUpdate(newPlugins);
-    } catch (e: any) {
-      setPluginStatus(plugin.name, { err: e?.message || String(e), removing: false });
-    }
-  };
 
   const handlePluginUpdateAll = async () => {
     for (const p of plugins) {
@@ -226,7 +226,7 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
                       <button
                         className="bg-gray-800 hover:bg-gray-700 disabled:opacity-50 p-2 m-1 rounded-md"
                         disabled={st.updating || st.removing}
-                        onClick={() => handleRemove(plugin)}
+                        onClick={() => handleRemovePlugin(plugin)}
                       >
                         {st.removing ? 'Removing…' : 'Remove'}
                       </button>
