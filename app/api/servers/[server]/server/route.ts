@@ -1,4 +1,4 @@
-import { downloadPaper } from "@/lib/downloader";
+import { downloadFabric, downloadPaper } from "@/lib/downloader";
 import path from "path";
 import fs from 'fs'
 import { getServer } from "@/lib/servers";
@@ -57,7 +57,11 @@ export async function PUT(req: Request) {
   try {
     const output = path.join(server.location, 'server.jar');
     let success = false;
-    let newVersion = await downloadPaper(build, server.version, output, server.name);
+    let newVersion = server.software === 'paper'? 
+      await downloadPaper(build, server.version, output, server.name) :
+      server.software === 'fabric'?
+        await downloadFabric(build, server.version, output, server.name) :
+        '';
     success = !!newVersion;
     
     if (success) {
