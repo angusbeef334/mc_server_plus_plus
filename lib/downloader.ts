@@ -223,6 +223,76 @@ export async function downloadHangar(name: string, version: string, software: st
 }
 
 /**
+ * @param name name of the mod
+ * @param version old version of the mod
+ * @param id modrinth mod id
+ * @param output output path of downloaded plugin
+ * @param server the server object
+ */
+export async function downloadModrinth(name: string, version: string, id: string, output: string, server: {software: string, version: string, name: string}): Promise<string> {
+  const url = `https://api.modrinth.com/v2/project/${id}/version?loaders=["${server.software}"]`;
+  let url1 = '';
+  let newVer = '';
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      console.error(`modrinth failed to download ${name}: ${res.statusText}`);
+      return '';
+    }
+    const data = await res.json();
+
+    data.map((ver: {
+      game_versions: string[]; id: string; files: {hashes: {sha512: string, sha1: string}, url: string}[]
+    }) => {
+      if (ver.game_versions.filter(ver => ver === server.version).length != 0 && url1 === '') {
+        url1 = ver.files[0].url;
+        newVer = ver.id;
+      }
+    })
+
+    if (newVer === version) return version;
+
+    const res1 = await downloadURL(name, url1, output);
+    
+    if (res1) {
+      const dataPath = path.join(process.cwd(), 'data', 'servers.json');
+      if (fs.existsSync(dataPath)) {
+        try {
+          const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
+
+          if (Array.isArray(data)) {
+            const i = data.findIndex(s => s.name === server.name);
+            if (i !== -1) {
+              const j = data[i].plugins.findIndex((plugin: { name: string }) => plugin.name === name);
+              if (j !== -1) {
+                data[i].plugins[j].version = newVer;
+                fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+              } else {
+                console.error(`plugin does not exist: ${name}`);
+              }
+            } else {
+              console.error('server not found');
+            }
+          } else {
+            console.error('invalid data format');
+          }
+        } catch (error) {
+          console.error(`failed to read data: ${error || 'unknown error'}`);
+        }
+      } else {
+        console.error(`server data file does not exist`);
+      }
+    }
+    
+    return res1? newVer : '';
+  } catch (e) {
+    console.error(`modrinth failed to download ${name}: ${e || 'unknown error'}`);
+    return '';
+  }
+}
+
+/**
  * @param name name of the plugin
  * @param version old version of the plugin
  * @param id bukkit plugin id
