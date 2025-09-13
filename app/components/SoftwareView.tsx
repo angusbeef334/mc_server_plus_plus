@@ -16,7 +16,7 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
   const [serverStatus, setServerStatus] = useState<{updating?: boolean; msg?: string, err?: string}>({});
 
   const [addOpen, setAddOpen] = useState(false);
-  const [addSource, setAddSource] = useState<'spigot' | 'github' | 'hangar' | 'bukkit' | 'direct'>('github');
+  const [addSource, setAddSource] = useState<'spigot' | 'github' | 'hangar' | 'modrinth' | 'bukkit' | 'direct'>('github');
 
   const setPluginStatus = (name: string, patch: Partial<{ updating: boolean; removing: boolean; msg: string; err: string }>) =>
     setStatus((s) => ({ ...s, [name]: { ...(s[name] || {}), ...patch } }));
@@ -281,6 +281,7 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
                   <option value="spigot" disabled={server.software === 'fabric'}>Spigot</option>
                   <option value="bukkit" disabled={server.software === 'fabric'}>Bukkit</option>
                   <option value="hangar" disabled={server.software === 'fabric'}>Hangar</option>
+                  <option value="modrinth" disabled={server.software !== 'fabric'}>Modrinth</option>
                 </select>
                 <input 
                   type="text" 
@@ -290,6 +291,7 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
                     addSource === 'github' ? 'Repository name' :
                     addSource === 'bukkit' ? 'Bukkit plugin ID' :
                     addSource === 'hangar' ? 'Hangar plugin ID' :
+                    addSource === 'modrinth' ? 'Modrinth plugin ID' :
                     'Direct download URL'
                   }
                   className="bg-gray-700 p-2 m-1 rounded-md"

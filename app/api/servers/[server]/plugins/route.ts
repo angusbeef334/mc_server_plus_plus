@@ -1,4 +1,4 @@
-import { downloadSpigot, downloadGithub, downloadURL, downloadBukkit, downloadHangar } from "@/lib/downloader";
+import { downloadSpigot, downloadGithub, downloadURL, downloadBukkit, downloadHangar, downloadModrinth } from "@/lib/downloader";
 import path from "path";
 import fs from 'fs'
 
@@ -66,6 +66,10 @@ export async function PUT(req: Request) {
         break;
       case "hangar":
         version = await downloadHangar(plugin.name, plugin.version, server.software, plugin.location, output, server);
+        success = !!version;
+        break;
+      case "modrinth":
+        version = await downloadModrinth(plugin.name, plugin.version, plugin.location, output, server);
         success = !!version;
         break;
       case "direct":
