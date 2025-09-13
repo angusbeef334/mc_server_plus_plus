@@ -10,7 +10,7 @@ export async function PUT(req: Request) {
     return Response.json({ error: "Invalid server and/or plugin param" }, { status: 400 });
   }
 
-  const output = path.join(server.location, 'plugins', `${plugin.name}.jar`);
+  const output = path.join(server.location, server.software === 'fabric' ? 'mods' : 'plugins', `${plugin.name}.jar`);
   let success = false;
   let version = '';
 
@@ -146,7 +146,7 @@ export async function DELETE(req: Request) {
     return Response.json({ error: "Server and/or plugin parameters invalid" }, { status: 400 });
   }
 
-  const location = `${server.location}/plugins/${plugin}.jar`;
+  const location = `${server.location}/${server.software === 'fabric' ? 'mods' : 'plugins'}/${plugin}.jar`;
   const dataPath = path.join(process.cwd(), 'data', 'servers.json');
 
   try {
