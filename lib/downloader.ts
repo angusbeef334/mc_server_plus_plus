@@ -8,6 +8,16 @@ export interface Plugin {
   location: string;
 }
 
+const semverCompare = (a: string, b: string) => {
+  const pa = a.split('.').map(Number);
+  const pb = b.split('.').map(Number);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const diff = (pa[i] || 0) - (pb[i] || 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
+};
+
 /**
  * @param name name of the plugin
  * @param version old version of the plugin
@@ -107,16 +117,6 @@ export async function downloadGithub(name: string, version: string, repo: string
     const data = await res.json();
     const newVersion = data.tag_name;
     const url = data.assets[0].browser_download_url;
-
-    const semverCompare = (a: string, b: string) => {
-      const pa = a.split('.').map(Number);
-      const pb = b.split('.').map(Number);
-      for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
-        const diff = (pa[i] || 0) - (pb[i] || 0);
-        if (diff !== 0) return diff;
-      }
-      return 0;
-    };
 
     if (semverCompare(newVersion, version) > 0) {
       version = newVersion;
@@ -233,6 +233,74 @@ export async function downloadBukkit(name: string, version: string, id: string, 
   const url = `https://dev.bukkit.org/projects/${id}/files/latest`;
 
   return await downloadURL(name, url, output);
+}
+
+/**
+ * @param fabricVer current build of fabric
+ * @param mcVer current version of mc
+ * @param output the output path of the downloaded software
+ * @param name the server name
+ * @returns string: new version if download successful else blank string
+ */
+export async function downloadFabric(version: string, mcVer: string, output: string, name: string) {
+  const url = `https://meta.fabricmc.net/v2/versions/loader/${mcVer}`;
+  const url1 = 'https://meta.fabricmc.net/v2/versions/installer';
+  try {
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      console.error(`failed to get fabric loader versions data: ${res.statusText}`);
+      return '';
+    }
+
+    const data = await res.json();
+    const build = data[0].loader.version;
+    if (semverCompare(build, version) === 0) {
+      console.log('no new version of fabric, aborting');
+      return version;
+    }
+
+    const res1 = await fetch(url1);
+
+    if (!res1.ok) {
+      console.error(`failed to get fabric installer versions data: ${res1.statusText}`);
+      return '';
+    }
+
+    const data1 = await res1.json();
+    const build1 = data1[0].version;
+
+    const url2 = `https://meta.fabricmc.net/v2/versions/loader/${mcVer}/${build}/${build1}/server/jar`;
+    const res2 = await downloadURL('server', url2, output);
+    
+    if (res2) {
+      const servers = path.join(process.cwd(), 'data', 'servers.json');
+      if (fs.existsSync(servers)) {
+        try {
+          const data = JSON.parse(fs.readFileSync(servers, "utf-8"));
+
+          if (Array.isArray(data)) {
+            const serverIndex = data.findIndex(server => server.name === name);
+            if (serverIndex !== -1) {
+              data[serverIndex].build = build.toString();
+              fs.writeFileSync(servers, JSON.stringify(data, null, 2), "utf-8");
+            } else {
+              console.error('server not found');
+            }
+          } else {
+            console.error(`invalid servers.json file`);
+          }
+        } catch (error) {
+          console.error(`failed to get data: ${error || 'unknown error'}`);
+        }
+      } else {
+        console.error(`servers.json does not exist`);
+      }
+    }
+    return res2? build : '';
+  } catch (e) {
+    console.error(`failed to download fabric: ${e}`)
+  }
 }
 
 /**

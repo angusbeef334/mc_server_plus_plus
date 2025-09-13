@@ -7,9 +7,14 @@ export default function Server() {
   const [addOpen, setAddOpen] = useState(false);
   const [addErr, setAddErr] = useState('');
   const [versions, setVersions] = useState<any[]>([]);
+  const [software, setSoftware] = useState('');
 
   useEffect(() => {
-    const getVersions = async () => {
+    setSoftware('paper');
+  }, [])
+
+  useEffect(() => {
+    const getVersionsPaper = async () => {
       try {
         const res = await fetch(
           "https://fill.papermc.io/v3/projects/paper/versions"
@@ -21,8 +26,23 @@ export default function Server() {
         console.error("failed to fetch versions", e);
       }
     };
-    getVersions();
-  }, []);
+    const getVersionsFabric = async () => {
+      try {
+        const res = await fetch('https://meta.fabricmc.net/v2/versions/game');
+        if (!res.ok) return;
+        const data = await res.json();
+        setVersions(data);
+      } catch (e) {
+        console.error(`Failed to fetch versions: ${e}`)
+      }
+    }
+
+    if (software === 'paper') {
+      getVersionsPaper();
+    } else if (software === 'fabric') {
+      getVersionsFabric();
+    }
+  }, [software]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -30,7 +50,6 @@ export default function Server() {
 
     const name = (document.getElementById('in-name') as HTMLInputElement).value;
     const directory = (document.getElementById('in-dir') as HTMLInputElement).value;
-    const software = (document.getElementById('in-software') as HTMLInputElement).value;
     const version = (document.getElementById('in-version') as HTMLInputElement).value;
 
     const server = {
@@ -85,16 +104,21 @@ export default function Server() {
             <form onSubmit={handleSubmit} className="flex flex-col">
               <input type="text" id="in-name" className="bg-gray-700 m-1 p-2 rounded-md w-full" placeholder="Name" required/>
               <input type="text" id="in-dir" className="bg-gray-700 m-1 p-2 rounded-md w-full" placeholder="Directory" required/>
-              <select id="in-software" className="bg-gray-700 m-1 rounded-md w-full py-2 px-1" required>
+              <select id="in-software" className="bg-gray-700 m-1 rounded-md w-full py-2 px-1" required onChange={(e) => {setVersions([]);setSoftware(e.target.value)}}>
                 <option value="paper">PaperMC</option>
                 <option value="spigot" disabled>Spigot</option>
                 <option value="forge" disabled>Forge</option>
-                <option value="fabric" disabled>Fabric</option>
+                <option value="fabric">Fabric</option>
               </select>
               <select id="in-version" className="bg-gray-700 m-1 rounded-md w-full py-2 px-1" required>
-                {versions.map((version) => (
+                {software === 'paper' && versions.map((version) => (
                   <option key={version.version.id} value={version.version.id} className="text-sm text-gray-300">
                     {version.version.id}
+                  </option>
+                ))}
+                {software === 'fabric' && versions.map(version => (
+                  <option key={version.version} value={version.version} className="text-sm text-gray-300">
+                    {version.version}
                   </option>
                 ))}
               </select>
