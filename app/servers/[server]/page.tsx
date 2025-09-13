@@ -11,7 +11,7 @@ export default function ServerPage() {
   const params = useParams()
   const serverName = params?.server
 
-  const [activeView, setActiveView] = useState<'dashboard' | 'software' | 'status' | 'settings'>('dashboard')
+  const [activeView, setActiveView] = useState<'dashboard' | 'software' | 'settings'>('dashboard')
   const [server, setServer] = useState<Server | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -88,7 +88,6 @@ export default function ServerPage() {
           {[
             "Dashboard",
             "Software",
-            "Status",
             "Settings"
           ].map((item) => (
             <button
@@ -112,9 +111,6 @@ export default function ServerPage() {
               onServerUpdate={updateServerData}
               onPluginsUpdate={updatePlugins}
             />
-          )}
-          {activeView == 'status' && (
-            <div/>
           )}
           {activeView == 'settings' && (
             <SettingsCard
