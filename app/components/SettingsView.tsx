@@ -53,7 +53,7 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
   };
 
   useEffect(() => {
-    const getVersions = async () => {
+    const getVersionsPaper = async () => {
       try {
         const res = await fetch(
           "https://fill.papermc.io/v3/projects/paper/versions"
@@ -65,7 +65,22 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
         console.error("failed to fetch versions", e);
       }
     };
-    getVersions();
+    const getVersionsFabric = async () => {
+      try {
+        const res = await fetch('https://meta.fabricmc.net/v2/versions/game');
+        if (!res.ok) return;
+        const data = await res.json();
+        setVersions(data);
+      } catch (e) {
+        console.error(`Failed to fetch versions: ${e}`)
+      }
+    }
+
+    if (server.software === 'paper') {
+      getVersionsPaper();
+    } else if (server.software === 'fabric') {
+      getVersionsFabric();
+    }
   }, []);
 
   useEffect(() => {
@@ -130,9 +145,14 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
               <>Loading versions...</>
           )}
           <select className="bg-gray-800 m-1 p-2 rounded-md hover:bg-gray-700" id="in-version">
-            {versions.map((version) => (
+            {server.software === 'paper' && versions.map((version) => (
               <option key={version.version.id} value={version.version.id} className="text-sm text-gray-300">
                 {version.version.id}
+              </option>
+            ))}
+            {server.software === 'fabric' && versions.map(version => (
+              <option key={version.version} value={version.version} className="text-sm text-gray-300">
+                {version.version}
               </option>
             ))}
           </select>
