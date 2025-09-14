@@ -23,9 +23,10 @@ const semverCompare = (a: string, b: string) => {
  * @param version old version of the plugin
  * @param id spigotmc plugin id
  * @param output output path of the downloaded plugin
+ * @param serverName name of the server
  * @returns string: new/current version if download successful/no new ver, empty if download failed, -2 if plugin is external (can't directly download)
  */
-export async function downloadSpigot(name: string, version: string, id: string, output: string): Promise<string> {
+export async function downloadSpigot(name: string, version: string, id: string, output: string, serverName: string): Promise<string> {
   const url = `https://api.spiget.org/v2/resources/${id}`;
   
   try {
@@ -48,13 +49,16 @@ export async function downloadSpigot(name: string, version: string, id: string, 
     if (json.version.id > version) {
       version = json.version.id.toString();
 
+      const res1 = (await downloadURL(name, `${url}/download?version=${version}`, output))
+      const newVer = res1? json.version.id : '';
+
       const dataPath = path.join(process.cwd(), 'data', 'servers.json');
       if (fs.existsSync(dataPath)) {
         try {
           const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
 
           if (Array.isArray(data)) {
-            const i = data.findIndex(server => server.name === server);
+            const i = data.findIndex(server => server.name === serverName);
             if (i !== -1) {
               const j = data[i].plugins.findIndex((plugin: { name: string }) => plugin.name === name);
               if (j !== -1) {
@@ -62,32 +66,28 @@ export async function downloadSpigot(name: string, version: string, id: string, 
                 fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
               } else {
                 console.error('plugin does not exist');
+                return '';
               }
             } else {
               console.error('server does not exist');
+              return '';
             }
           } else {
             console.error('invalid server data');
+            return '';
           }
         } catch (error) {
           console.error(`failed to read data: ${error || 'unknown error'}`);
         }
       } else {
         console.error(`server data file does not exist`);
+        return '';
       }
+      
+      return newVer;
     } else {
       console.log(`no new version of ${name}, aborting`);
       return version;
-    }
-
-    try {
-      return (
-        (await downloadURL(name, `${url}/download?version=${version}`, output))?
-        json.version.id : version
-      )
-    } catch (err) {
-      console.error(`failed to download plugin ${name}: ${err || 'unknown error'}`);
-      return '';
     }
   } catch (err) {
     console.error(`failed to get plugin information: ${err || 'unknown error'}`);
@@ -100,9 +100,10 @@ export async function downloadSpigot(name: string, version: string, id: string, 
  * @param version old version of the plugin
  * @param repo github repository id of the plugin
  * @param output output path of downloaded plugin
+ * @param serverName name of the server
  * @returns string: empty if download failed, otherwise the new version
  */
-export async function downloadGithub(name: string, version: string, repo: string, output: string): Promise<string> {
+export async function downloadGithub(name: string, version: string, repo: string, output: string, serverName: string): Promise<string> {
   try {
     const res = await fetch(`https://api.github.com/repos/${repo}/releases/latest`, {
       headers: {
@@ -119,45 +120,49 @@ export async function downloadGithub(name: string, version: string, repo: string
     const url = data.assets[0].browser_download_url;
 
     if (semverCompare(newVersion, version) > 0) {
-      version = newVersion;
+      const res1 = await downloadURL(name, url, output);
+      const newVer = res1? newVersion : '';
 
-      const dataPath = path.join(process.cwd(), 'data', 'servers.json');
-      if (fs.existsSync(dataPath)) {
-        try {
-          const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
+      if (res1) {
+        const dataPath = path.join(process.cwd(), 'data', 'servers.json');
+        if (fs.existsSync(dataPath)) {
+          try {
+            const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
 
-          if (Array.isArray(data)) {
-            //server
-            const i = data.findIndex(server => server.name === server);
-            if (i !== -1) {
-              //plugin
-              const j = data[i].plugins.findIndex((plugin: { name: string }) => plugin.name === name);
-              if (j !== -1) {
-                data[i].plugins[j].version = version;
-                fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+            if (Array.isArray(data)) {
+              const i = data.findIndex(server => server.name === serverName);
+              if (i !== -1) {
+                const j = data[i].plugins.findIndex((plugin: { name: string }) => plugin.name === name);
+                if (j !== -1) {
+                  data[i].plugins[j].version = newVersion;
+                  fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+                } else {
+                  console.error(`plugin does not exist: ${name}`);
+                  return '';
+                }
               } else {
-                console.error(`plugin does not exist: ${name}`);
+                console.error('server not found');
+                return '';
               }
             } else {
-              console.error('server not found');
+              console.error('invalid data format');
+              return '';
             }
-          } else {
-            console.error('invalid data format');
+          } catch (error) {
+            console.error(`failed to get data: ${error || 'unknown error'}`);
+            return '';
           }
-        } catch (error) {
-          console.error(`failed to get data`);
+        } else {
+          console.error(`data file does not exist`);
+          return '';
         }
-      } else {
-        console.error(`data file does not exist`);
       }
+      
+      return newVer;
     } else {
       console.log(`no new version of ${name}, aborting`);
       return version;
     }
-
-    const res1 = await downloadURL(name, url, output);
-
-    return res1? newVersion : '';
   } catch (err) {
     console.error(`[github] failed to download ${name}: ${err || 'unknown error'}`);
     return '';
@@ -170,9 +175,10 @@ export async function downloadGithub(name: string, version: string, repo: string
  * @param software the software (paper, velocity, waterfall) to download plugin for
  * @param id hangar plugin id
  * @param output output path of the downloaded plugin
+ * @param serverName name of the server
  * @returns string: new/current version if download successful/no new ver, empty if download failed, -2 if plugin is external (can't directly download)
  */
-export async function downloadHangar(name: string, version: string, software: string, id: string, output: string): Promise<string> {
+export async function downloadHangar(name: string, version: string, software: string, id: string, output: string, serverName: string): Promise<string> {
   const url = `https://hangar.papermc.io/api/v1/projects/${id}/versions`;
 
   try {
@@ -184,38 +190,44 @@ export async function downloadHangar(name: string, version: string, software: st
     
     const url1 = data.result[0].downloads[software.toUpperCase()].downloadUrl;
     const res1 = await downloadURL(name, url1, output);
+    const newVer = res1? ver : '';
 
-    const dataPath = path.join(process.cwd(), 'data', 'servers.json');
-    if (fs.existsSync(dataPath)) {
-      try {
-        const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
+    if (res1) {
+      const dataPath = path.join(process.cwd(), 'data', 'servers.json');
+      if (fs.existsSync(dataPath)) {
+        try {
+          const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
 
-        if (Array.isArray(data)) {
-          //server
-          const i = data.findIndex(server => server.name === name);
-          if (i !== -1) {
-            //plugin
-            const j = data[i].plugins.findIndex((plugin: { name: string }) => plugin.name === name);
-            if (j !== -1) {
-              data[i].plugins[j].version = ver.toString();
-              fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+          if (Array.isArray(data)) {
+            const i = data.findIndex(server => server.name === serverName);
+            if (i !== -1) {
+              const j = data[i].plugins.findIndex((plugin: { name: string }) => plugin.name === name);
+              if (j !== -1) {
+                data[i].plugins[j].version = ver.toString();
+                fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+              } else {
+                console.error(`plugin does not exist: ${name}`);
+                return '';
+              }
             } else {
-              console.error(`plugin does not exist: ${name}`);
+              console.error('server not found');
+              return '';
             }
           } else {
-            console.error('server not found');
+            console.error('invalid data format');
+            return '';
           }
-        } else {
-          console.error('invalid data format');
+        } catch (error) {
+          console.error(`failed to get data: ${error || 'unknown error'}`);
+          return '';
         }
-      } catch (error) {
-        console.error(`failed to get data`);
+      } else {
+        console.error(`data file does not exist`);
+        return '';
       }
-    } else {
-      console.error(`data file does not exist`);
     }
 
-    return res1? ver : '';
+    return newVer;
   } catch (err) {
     console.error(`[hangar] failed to download ${name}: ${err || 'unknown error'}`);
     return '';

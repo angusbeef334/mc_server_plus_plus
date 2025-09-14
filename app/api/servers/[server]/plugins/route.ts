@@ -52,12 +52,12 @@ export async function PUT(req: Request) {
   try {      
     switch (plugin.source) {
       case "spigot":
-        version = await downloadSpigot(plugin.name, plugin.version, plugin.location, output);
+        version = await downloadSpigot(plugin.name, plugin.version, plugin.location, output, server.name);
         success = !!version && version != '-2';
         if (version == '-2') return Response.json({error: 'plugin is externally hosted, spigot download not supported'}, { status: 500 });
         break;
       case "github":
-        version = await downloadGithub(plugin.name, plugin.version, plugin.location, output);
+        version = await downloadGithub(plugin.name, plugin.version, plugin.location, output, server.name);
         success = !!version;
         break;
       case "bukkit":
@@ -65,7 +65,7 @@ export async function PUT(req: Request) {
         if (success) version = "-1";
         break;
       case "hangar":
-        version = await downloadHangar(plugin.name, plugin.version, server.software, plugin.location, output);
+        version = await downloadHangar(plugin.name, plugin.version, server.software, plugin.location, output, server.name);
         success = !!version;
         break;
       case "modrinth":
