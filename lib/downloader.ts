@@ -25,7 +25,7 @@ const semverCompare = (a: string, b: string) => {
  * @param output output path of the downloaded plugin
  * @returns string: new/current version if download successful/no new ver, empty if download failed, -2 if plugin is external (can't directly download)
  */
-export async function downloadSpigot(name: string, version: string, id: string, output: string, server: string): Promise<string> {
+export async function downloadSpigot(name: string, version: string, id: string, output: string): Promise<string> {
   const url = `https://api.spiget.org/v2/resources/${id}`;
   
   try {
@@ -102,7 +102,7 @@ export async function downloadSpigot(name: string, version: string, id: string, 
  * @param output output path of downloaded plugin
  * @returns string: empty if download failed, otherwise the new version
  */
-export async function downloadGithub(name: string, version: string, repo: string, output: string, server: string): Promise<string> {
+export async function downloadGithub(name: string, version: string, repo: string, output: string): Promise<string> {
   try {
     const res = await fetch(`https://api.github.com/repos/${repo}/releases/latest`, {
       headers: {
@@ -172,7 +172,7 @@ export async function downloadGithub(name: string, version: string, repo: string
  * @param output output path of the downloaded plugin
  * @returns string: new/current version if download successful/no new ver, empty if download failed, -2 if plugin is external (can't directly download)
  */
-export async function downloadHangar(name: string, version: string, software: string, id: string, output: string, server: string): Promise<string> {
+export async function downloadHangar(name: string, version: string, software: string, id: string, output: string): Promise<string> {
   const url = `https://hangar.papermc.io/api/v1/projects/${id}/versions`;
 
   try {
