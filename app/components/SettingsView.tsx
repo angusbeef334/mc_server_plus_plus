@@ -15,6 +15,7 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
   const [serverStatus, setServerStatus] = useState<{updating?: boolean; msg?: string, err?: string}>({});
   const [propsOpen, setPropsOpen] = useState(false);
   const [mappings, setMappings] = useState<any>();
+  const [javaOpen, setJavaOpen] = useState(false);
 
   const handleServerUpdate = async () => {
     try {
@@ -189,6 +190,17 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
           </button>
           <label className="p-2">Change the values in the server.properties file</label>
         </div>
+
+        <h3 className="text-lg text-white font-semibold">Java</h3>
+        <div className="flex flex-row items-center">
+          <button
+            className="bg-gray-800 hover:bg-gray-700 rounded-md p-2 m-1 w-min"
+            onClick={() => setJavaOpen(true)}
+          >
+            Change
+          </button>
+          <label className="p-2">Select another installation of Java to use</label>
+        </div>
       </div>
       {propsOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -247,6 +259,40 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
             >
               Save
             </button>
+          </div>
+        </div>
+      )}
+      {javaOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 rounded-lg shadow-xl max-h-[75vh] p-4 sm:p-6 w-full max-w-md relative border border-gray-700 mx-2">
+            <button
+              onClick={() => setJavaOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+            <div className="flex flex-col">
+              <h2 className="text-lg sm:text-xl mb-4 text-white">Java</h2>
+              <label>Auto-detected Java installs:</label>
+              <select className="bg-gray-700 hover:bg-gray-600 p-2 m-1 rounded-md">
+                
+              </select>
+              <label>You can choose another Java binary manually:</label>
+              <input type="file"/>
+            </div>
           </div>
         </div>
       )}
