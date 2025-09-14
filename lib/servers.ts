@@ -1,20 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 
-export interface Plugin {
-  name: string;
-  version: string;
-  source: string;
-  location: string;
-}
-
-export interface Server {
-  name: string;
-  location: string;
-  software: string;
-  plugins: Plugin[];
-}
-
 export function getAllServers(): Server[] {
   const dataPath = path.join(process.cwd(), 'data', 'servers.json');
   try {

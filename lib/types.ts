@@ -1,14 +1,16 @@
+interface Mod {
+  name: string;
+  version: string;
+  source: string;
+  location: string;
+}
+
 interface Server {
   name: string;
   location: string;
   software: string;
   version: string;
   build: string;
-  plugins: {
-    name: string;
-    version: string;
-    source: string;
-    location: string;
-  }[];
+  plugins: Mod[];
   java: string;
 }
