@@ -9,7 +9,7 @@ interface SoftwareViewProps {
 }
 
 export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdate}: SoftwareViewProps) {
-  const [server, setServer] = useState(JSON.parse(serverData));
+  const [server, setServer] = useState<Server>(JSON.parse(serverData));
   const [plugins, setPlugins] = useState<any[]>(server.plugins || []);
   const [status, setStatus] = useState<Record<string, { updating?: boolean; removing?: boolean; msg?: string; err?: string }>>({});
   const [addStatus, setAddStatus] = useState<{ adding?: boolean; removing?: boolean; msg?: string; err?: string }>({});

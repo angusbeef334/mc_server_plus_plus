@@ -8,7 +8,7 @@ interface SettingsCardProps {
 }
 
 export default function SettingsView({ serverData, onServerUpdate }: SettingsCardProps) {
-  const [server, setServer] = useState(JSON.parse(serverData));
+  const [server, setServer] = useState<Server>(JSON.parse(serverData));
   const [versions, setVersions] = useState<any[]>([]);
   const [properties, setProperties] = useState<any[]>([]);
   const [tempProps, setTempProps] = useState<any[]>([]);

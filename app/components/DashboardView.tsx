@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { AnsiUp } from 'ansi_up';
 
 interface ServerViewProps {
-  server: any;
+  server: Server;
 }
 
 export default function ServerView({server}: ServerViewProps) {
