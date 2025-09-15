@@ -1,6 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 
+import { Server } from '@/lib/types';
+
 export function getAllServers(): Server[] {
   const dataPath = path.join(process.cwd(), 'data', 'servers.json');
   try {
