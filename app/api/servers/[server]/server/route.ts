@@ -3,6 +3,7 @@ import path from "path";
 import fs from 'fs'
 import { getServer } from "@/lib/servers";
 import { start, status, stop, log, command, properties, mappings } from "@/lib/serverState"
+import { Server } from '@/lib/types'
 
 export async function GET(req: Request, { params }: { params: Promise<{ server: string }> }) {
   const urlParams = new URL(req.url).searchParams;
@@ -87,7 +88,7 @@ export async function PATCH(req: Request) {
       if (fs.existsSync(dataPath)) {
         const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
         if (Array.isArray(data)) {
-          const i = data.findIndex((s: any) => s.name === server.name);
+          const i = data.findIndex((s: Server) => s.name === server.name);
           if (i !== -1) {
             data[i].version = param;
             fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");

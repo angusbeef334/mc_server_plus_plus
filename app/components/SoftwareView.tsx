@@ -1,16 +1,17 @@
 'use client'
 
 import { useState, useEffect } from 'react';
+import { Mod, Server } from '@/lib/types'
 
 interface SoftwareViewProps {
-  serverData: any;
-  onServerUpdate: (updatedServer: Partial<any>) => void;
-  onPluginsUpdate: (plugins: any[]) => void;
+  serverData: string;
+  onServerUpdate: (updatedServer: Partial<Server>) => void;
+  onPluginsUpdate: (plugins: Mod[]) => void;
 }
 
 export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdate}: SoftwareViewProps) {
-  const [server, setServer] = useState(JSON.parse(serverData));
-  const [plugins, setPlugins] = useState<any[]>(server.plugins || []);
+  const [server, setServer] = useState<Server>(JSON.parse(serverData));
+  const [plugins, setPlugins] = useState<Mod[]>(server.plugins || []);
   const [status, setStatus] = useState<Record<string, { updating?: boolean; removing?: boolean; msg?: string; err?: string }>>({});
   const [addStatus, setAddStatus] = useState<{ adding?: boolean; removing?: boolean; msg?: string; err?: string }>({});
   const [serverStatus, setServerStatus] = useState<{updating?: boolean; msg?: string, err?: string}>({});
@@ -66,7 +67,7 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
     onPluginsUpdate(newPlugins);
   }
 
-  const handleRemovePlugin = async (plugin: any) => {
+  const handleRemovePlugin = async (plugin: Mod) => {
     if (!confirm(`Remove ${plugin.name}?`)) return;
     try {
       setPluginStatus(plugin.name, { removing: true, err: undefined, msg: undefined });
@@ -93,7 +94,7 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
     }
   };
 
-  const handlePluginUpdate = async (plugin: any) => {
+  const handlePluginUpdate = async (plugin: Mod) => {
     try {
       setPluginStatus(plugin.name, { updating: true, err: undefined, msg: undefined });
       
@@ -196,7 +197,7 @@ export default function SoftwareView({serverData, onServerUpdate, onPluginsUpdat
 
         {plugins && plugins.length > 0 ? (
           <div className="flex flex-col space-y-2">
-            {plugins.map((plugin: any) => {
+            {plugins.map((plugin: Mod) => {
               const st = status[plugin.name] || {};
               return (
                 <div key={plugin.name} className="flex flex-col bg-gray-800/40 p-2 rounded-md border border-gray-700">

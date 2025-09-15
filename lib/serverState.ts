@@ -2,20 +2,7 @@ import { ChildProcess, spawn } from "child_process"
 import fs from "fs"
 import path from "path";
 import { getProperties } from "properties-file";
-
-export interface Plugin {
-  name: string;
-  version: string;
-  source: string;
-  location: string;
-}
-
-export interface Server {
-  name: string;
-  location: string;
-  software: string;
-  plugins: Plugin[];
-}
+import { Server } from '@/lib/types'
 
 let servers: { key: string, process: ChildProcess, status: string, log: string }[] = [];
 

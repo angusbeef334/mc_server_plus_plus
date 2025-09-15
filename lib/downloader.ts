@@ -1,12 +1,6 @@
 import fs from "fs";
 import path from "path";
-
-export interface Plugin {
-  name: string;
-  version: string;
-  source: string;
-  location: string;
-}
+import { Server, Mod } from "./types";
 
 const semverCompare = (a: string, b: string) => {
   const pa = a.split('.').map(Number);
@@ -60,7 +54,7 @@ export async function downloadSpigot(name: string, version: string, id: string, 
           if (Array.isArray(data)) {
             const i = data.findIndex(server => server.name === serverName);
             if (i !== -1) {
-              const j = data[i].plugins.findIndex((plugin: { name: string }) => plugin.name === name);
+              const j = data[i].plugins.findIndex((plugin: Mod) => plugin.name === name);
               if (j !== -1) {
                 data[i].plugins[j].version = version;
                 fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
@@ -132,7 +126,7 @@ export async function downloadGithub(name: string, version: string, repo: string
             if (Array.isArray(data)) {
               const i = data.findIndex(server => server.name === serverName);
               if (i !== -1) {
-                const j = data[i].plugins.findIndex((plugin: { name: string }) => plugin.name === name);
+                const j = data[i].plugins.findIndex((plugin: Mod) => plugin.name === name);
                 if (j !== -1) {
                   data[i].plugins[j].version = newVersion;
                   fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
@@ -201,7 +195,7 @@ export async function downloadHangar(name: string, version: string, software: st
           if (Array.isArray(data)) {
             const i = data.findIndex(server => server.name === serverName);
             if (i !== -1) {
-              const j = data[i].plugins.findIndex((plugin: { name: string }) => plugin.name === name);
+              const j = data[i].plugins.findIndex((plugin: Mod) => plugin.name === name);
               if (j !== -1) {
                 data[i].plugins[j].version = ver.toString();
                 fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
@@ -241,7 +235,7 @@ export async function downloadHangar(name: string, version: string, software: st
  * @param output output path of downloaded plugin
  * @param server the server object
  */
-export async function downloadModrinth(name: string, version: string, id: string, output: string, server: {software: string, version: string, name: string}): Promise<string> {
+export async function downloadModrinth(name: string, version: string, id: string, output: string, server: Server): Promise<string> {
   const url = `https://api.modrinth.com/v2/project/${id}/version?loaders=["${server.software}"]`;
   let url1 = '';
   let newVer = '';
@@ -276,7 +270,7 @@ export async function downloadModrinth(name: string, version: string, id: string
           if (Array.isArray(data)) {
             const i = data.findIndex(s => s.name === server.name);
             if (i !== -1) {
-              const j = data[i].plugins.findIndex((plugin: { name: string }) => plugin.name === name);
+              const j = data[i].plugins.findIndex((plugin: Mod) => plugin.name === name);
               if (j !== -1) {
                 data[i].plugins[j].version = newVer;
                 fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
