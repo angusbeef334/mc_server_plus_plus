@@ -1,12 +1,6 @@
 import fs from "fs";
 import path from "path";
-
-export interface Plugin {
-  name: string;
-  version: string;
-  source: string;
-  location: string;
-}
+import { Mod } from "./types";
 
 const semverCompare = (a: string, b: string) => {
   const pa = a.split('.').map(Number);
@@ -60,7 +54,7 @@ export async function downloadSpigot(name: string, version: string, id: string, 
           if (Array.isArray(data)) {
             const i = data.findIndex(server => server.name === serverName);
             if (i !== -1) {
-              const j = data[i].plugins.findIndex((plugin: Plugin) => plugin.name === name);
+              const j = data[i].plugins.findIndex((plugin: Mod) => plugin.name === name);
               if (j !== -1) {
                 data[i].plugins[j].version = version;
                 fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
