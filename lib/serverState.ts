@@ -12,7 +12,7 @@ function getKey(server: Server) {
 
 export function start(server: Server) {
   const key = getKey(server);
-  let child = spawn('java', ['-Xms2G', '-Xmx4G', '-jar', path.join(server.location, 'server.jar'), '--nogui'], { cwd: server.location });
+  let child = spawn(server.java, ['-Xms2G', '-Xmx4G', '-jar', path.join(server.location, 'server.jar'), '--nogui'], { cwd: server.location });
   servers.push({ key, process: child, status: 'Online', log: ""});
   const s = servers.find(s => s.key === key);
   if (s == null) {

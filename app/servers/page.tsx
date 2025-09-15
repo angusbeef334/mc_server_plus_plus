@@ -58,7 +58,8 @@ export default function Server() {
       "software": software,
       "version": version,
       "build": "0",
-      "plugins": []
+      "plugins": [],
+      "java": "java",
     };
 
     const res = await fetch(`/api/servers/SErver/server`, {
