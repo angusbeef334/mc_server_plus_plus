@@ -21,14 +21,14 @@ export async function PUT(req: Request) {
       const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
       if (Array.isArray(data)) {
         //server
-        const i = data.findIndex((s: any) => s.name === server.name);
+        const i = data.findIndex((s: Server) => s.name === server.name);
         if (i === -1) {
           return Response.json({ error: "server does not exist" }, { status: 400 });
         }
 
         if (!Array.isArray(data[i].plugins)) data[i].plugins = [];
         
-        const existing = data[i].plugins.find((p: any) => p.name === plugin.name);
+        const existing = data[i].plugins.find((p: Mod) => p.name === plugin.name);
         
         if (!existing) {
           const newPlugin = {
@@ -86,10 +86,10 @@ export async function PUT(req: Request) {
           const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
 
           if (Array.isArray(data)) {
-            const i = data.findIndex((s: any) => s.name === server.name);
+            const i = data.findIndex((s: Server) => s.name === server.name);
 
             if (i !== -1 && Array.isArray(data[i].plugins)) {
-              data[i].plugins = data[i].plugins.filter((p: any) => p.name !== plugin.name);
+              data[i].plugins = data[i].plugins.filter((p: Mod) => p.name !== plugin.name);
               fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
             }
           }
@@ -116,9 +116,9 @@ export async function PUT(req: Request) {
         if (fs.existsSync(dataPath)) {
           const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
           if (Array.isArray(data)) {
-            const si = data.findIndex((s: any) => s.name === server.name);
+            const si = data.findIndex((s: Server) => s.name === server.name);
             if (si !== -1 && Array.isArray(data[si].plugins)) {
-              data[si].plugins = data[si].plugins.filter((p: any) => p.name !== plugin.name);
+              data[si].plugins = data[si].plugins.filter((p: Mod) => p.name !== plugin.name);
               fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
             }
           }
