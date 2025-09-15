@@ -5,7 +5,7 @@ import { Server } from '@/lib/types'
 
 interface SettingsCardProps {
   serverData: string;
-  onServerUpdate: (updatedServer: Partial<any>) => void;
+  onServerUpdate: (updatedServer: Partial<Server>) => void;
 }
 
 export default function SettingsView({ serverData, onServerUpdate }: SettingsCardProps) {
