@@ -4,7 +4,7 @@ import DashboardView from '@/app/components/DashboardView'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Server } from '@/lib/servers'
+import { Server } from '@/lib/types'
 import SettingsCard from '@/app/components/SettingsView'
 
 export default function ServerPage() {

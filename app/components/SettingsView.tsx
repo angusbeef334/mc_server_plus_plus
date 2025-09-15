@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Server } from '@/lib/types'
 
 interface SettingsCardProps {
   serverData: string;

@@ -1,11 +1,11 @@
-interface Mod {
+export interface Mod {
   name: string;
   version: string;
   source: string;
   location: string;
 }
 
-interface Server {
+export interface Server {
   name: string;
   location: string;
   software: string;

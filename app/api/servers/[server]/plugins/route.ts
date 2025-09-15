@@ -1,6 +1,7 @@
 import { downloadSpigot, downloadGithub, downloadURL, downloadBukkit, downloadHangar, downloadModrinth } from "@/lib/downloader";
 import path from "path";
 import fs from 'fs'
+import { Server, Mod } from '@/lib/types'
 
 export async function PUT(req: Request) {
   const body = await req.json();

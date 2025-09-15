@@ -3,6 +3,7 @@ import path from "path";
 import fs from 'fs'
 import { getServer } from "@/lib/servers";
 import { start, status, stop, log, command, properties, mappings } from "@/lib/serverState"
+import { Server } from '@/lib/types'
 
 export async function GET(req: Request, { params }: { params: Promise<{ server: string }> }) {
   const urlParams = new URL(req.url).searchParams;

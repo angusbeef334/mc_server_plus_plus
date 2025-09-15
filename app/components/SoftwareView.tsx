@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react';
+import { Server } from '@/lib/types'
 
 interface SoftwareViewProps {
   serverData: any;
