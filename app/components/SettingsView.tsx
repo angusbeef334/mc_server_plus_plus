@@ -72,6 +72,21 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
     }
   }
 
+  const testJava = async (path: string) => {
+    try {
+      const res = await fetch('/api/java/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path })
+      });
+      if (!res.ok) alert(`failed to test java: ${res.statusText}`);
+
+      alert((await res.json()).output);
+    } catch (e: any) {
+      alert(`failed to test java: ${e}`);
+    }
+  };
+
   const convertProps = (keyValueProps: any[]) => {
     let ret = "";
     {Object.entries(keyValueProps).map(([key, value]) => {
@@ -318,7 +333,7 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
             <div className="flex flex-col">
               <h2 className="text-lg sm:text-xl mb-4 text-white">Java</h2>
               <label>Auto-detected Java installs:</label>
-              <select className="bg-gray-700 hover:bg-gray-600 p-2 m-1 rounded-md">
+              <select className="bg-gray-700 hover:bg-gray-600 p-2 m-1 rounded-md" id="in-java1">
                 {java.trimEnd().split('\n').map(j => (
                   <option key={j}>{j}</option>
                 ))}
@@ -329,13 +344,13 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
               <section>
                 <button 
                   className="bg-gray-700 hover:bg-gray-600 p-2 m-1 rounded-md w-min"
-                  onClick={() => getJava()}
+                  onClick={async() => testJava((document.getElementById('in-java') as HTMLInputElement).value || (document.getElementById('in-java1') as HTMLInputElement).value)}
                 >
                   Test
                 </button>
                 <button 
                   className="bg-blue-600 p-2 m-1 rounded-md w-min"
-                  onClick={() => updateJava((document.getElementById('in-java') as HTMLInputElement).value)}
+                  onClick={() => updateJava((document.getElementById('in-java') as HTMLInputElement).value || (document.getElementById('in-java1') as HTMLInputElement).value)}
                 >
                   Save
                 </button>
