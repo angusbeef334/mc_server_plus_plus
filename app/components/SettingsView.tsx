@@ -46,6 +46,19 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
     }
   };
 
+  const updateJava = async (java: string) => {
+    try {
+      const res = await fetch(`/api/servers/${server.name}/server`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ server, param: java, action: 'java' })
+      })
+      if (!res.ok) alert(`failed to update java version: ${res.statusText}`);
+    } catch (e: any) {
+      alert(`failed to update java version: ${e.error || 'unknown error'}`);
+    }
+  }
+
   const convertProps = (keyValueProps: any[]) => {
     let ret = "";
     {Object.entries(keyValueProps).map(([key, value]) => {
@@ -292,7 +305,22 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
                 
               </select>
               <label>You can choose another Java binary manually:</label>
-              <input type="file"/>
+              <input className="bg-gray-700 m-1 p-2 rounded-md" type="text" id="in-java" placeholder="Path to Java binary"/>
+
+              <section>
+                <button 
+                  className="bg-gray-700 hover:bg-gray-600 p-2 m-1 rounded-md w-min"
+                  onClick={() => alert('todo')}
+                >
+                  Test
+                </button>
+                <button 
+                  className="bg-blue-600 p-2 m-1 rounded-md w-min"
+                  onClick={() => updateJava((document.getElementById('in-java') as HTMLInputElement).value)}
+                >
+                  Save
+                </button>
+              </section>
             </div>
           </div>
         </div>
