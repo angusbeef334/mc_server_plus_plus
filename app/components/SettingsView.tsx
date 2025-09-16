@@ -78,10 +78,9 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ path })
-      });
-      if (!res.ok) alert(`failed to test java: ${res.statusText}`);
+      });        
 
-      alert((await res.json()).output);
+      alert((await res.json()).output || (await res.json()).error);
     } catch (e: any) {
       alert(`failed to test java: ${e}`);
     }
