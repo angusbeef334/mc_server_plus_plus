@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from "react";
 import ServerCard from "./ServerCard";
+import { Server } from "@/lib/types";
 
 export function ServersGrid() {
   const [servers, setServers] = useState<Server[]>([]);
