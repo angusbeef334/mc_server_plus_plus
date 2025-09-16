@@ -17,6 +17,7 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
   const [propsOpen, setPropsOpen] = useState(false);
   const [mappings, setMappings] = useState<any>();
   const [javaOpen, setJavaOpen] = useState(false);
+  const [java, setJava] = useState('');
 
   const handleServerUpdate = async () => {
     try {
@@ -46,6 +47,18 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
     }
   };
 
+  const getJava = async () => {
+    try {
+      const res = await fetch(`/api/java/detect`, { method: 'GET' });
+
+      if (!res.ok) alert(`could not get java versions: ${res.statusText}`);
+
+      setJava((await res.json()).data);
+    } catch (e: any) {
+      alert(`could not get java versions: ${e}`)
+    }
+  }
+
   const updateJava = async (java: string) => {
     try {
       const res = await fetch(`/api/servers/${server.name}/server`, {
@@ -66,6 +79,10 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
     })};
     return ret;
   };
+
+  useEffect(() => {
+    getJava();
+  })
 
   useEffect(() => {
     const getVersionsPaper = async () => {
@@ -302,7 +319,9 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
               <h2 className="text-lg sm:text-xl mb-4 text-white">Java</h2>
               <label>Auto-detected Java installs:</label>
               <select className="bg-gray-700 hover:bg-gray-600 p-2 m-1 rounded-md">
-                
+                {java.trimEnd().split('\n').map(j => (
+                  <option key={j}>{j}</option>
+                ))}
               </select>
               <label>You can choose another Java binary manually:</label>
               <input className="bg-gray-700 m-1 p-2 rounded-md" type="text" id="in-java" placeholder="Path to Java binary"/>
@@ -310,7 +329,7 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
               <section>
                 <button 
                   className="bg-gray-700 hover:bg-gray-600 p-2 m-1 rounded-md w-min"
-                  onClick={() => alert('todo')}
+                  onClick={() => getJava()}
                 >
                   Test
                 </button>
