@@ -17,6 +17,7 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
   const [propsOpen, setPropsOpen] = useState(false);
   const [mappings, setMappings] = useState<any>();
   const [javaOpen, setJavaOpen] = useState(false);
+  const [java, setJava] = useState('');
 
   const handleServerUpdate = async () => {
     try {
@@ -46,6 +47,45 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
     }
   };
 
+  const getJava = async () => {
+    try {
+      const res = await fetch(`/api/java/detect`, { method: 'GET' });
+
+      if (!res.ok) alert(`could not get java versions: ${res.statusText}`);
+
+      setJava((await res.json()).data);
+    } catch (e: any) {
+      alert(`could not get java versions: ${e}`)
+    }
+  }
+
+  const updateJava = async (java: string) => {
+    try {
+      const res = await fetch(`/api/servers/${server.name}/server`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ server, param: java, action: 'java' })
+      })
+      if (!res.ok) alert(`failed to update java version: ${res.statusText}`);
+    } catch (e: any) {
+      alert(`failed to update java version: ${e.error || 'unknown error'}`);
+    }
+  }
+
+  const testJava = async (path: string) => {
+    try {
+      const res = await fetch('/api/java/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path })
+      });        
+
+      alert((await res.json()).output || (await res.json()).error);
+    } catch (e: any) {
+      alert(`failed to test java: ${e}`);
+    }
+  };
+
   const convertProps = (keyValueProps: any[]) => {
     let ret = "";
     {Object.entries(keyValueProps).map(([key, value]) => {
@@ -53,6 +93,10 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
     })};
     return ret;
   };
+
+  useEffect(() => {
+    getJava();
+  })
 
   useEffect(() => {
     const getVersionsPaper = async () => {
@@ -288,11 +332,28 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
             <div className="flex flex-col">
               <h2 className="text-lg sm:text-xl mb-4 text-white">Java</h2>
               <label>Auto-detected Java installs:</label>
-              <select className="bg-gray-700 hover:bg-gray-600 p-2 m-1 rounded-md">
-                
+              <select className="bg-gray-700 hover:bg-gray-600 p-2 m-1 rounded-md" id="in-java1">
+                {java.trimEnd().split('\n').map(j => (
+                  <option key={j}>{j}</option>
+                ))}
               </select>
               <label>You can choose another Java binary manually:</label>
-              <input type="file"/>
+              <input className="bg-gray-700 m-1 p-2 rounded-md" type="text" id="in-java" placeholder="Path to Java binary"/>
+
+              <section>
+                <button 
+                  className="bg-gray-700 hover:bg-gray-600 p-2 m-1 rounded-md w-min"
+                  onClick={async() => testJava((document.getElementById('in-java') as HTMLInputElement).value || (document.getElementById('in-java1') as HTMLInputElement).value)}
+                >
+                  Test
+                </button>
+                <button 
+                  className="bg-blue-600 p-2 m-1 rounded-md w-min"
+                  onClick={() => updateJava((document.getElementById('in-java') as HTMLInputElement).value || (document.getElementById('in-java1') as HTMLInputElement).value)}
+                >
+                  Save
+                </button>
+              </section>
             </div>
           </div>
         </div>
