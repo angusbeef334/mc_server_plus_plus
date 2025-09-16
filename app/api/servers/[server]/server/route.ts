@@ -132,6 +132,25 @@ export async function PATCH(req: Request) {
     } catch (e) {
       return Response.json({ error: "Failed to add server" }, { status: 500 });
     }
+  } else if (action === "java") {
+    try {
+      const dataPath = path.join(process.cwd(), 'data', 'servers.json');
+      if (fs.existsSync(dataPath)) {
+        const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+        if (Array.isArray(data)) {
+          const i = data.findIndex((s: Server) => s.name === server.name);
+          if (i !== -1) {
+            data[i].java = param;
+            fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+            return Response.json({ message: "Succesfully updated java" }, { status: 200 });
+          } else {
+            return Response.json({ error: "Server does not exist" }, { status: 500 });
+          }
+        }
+      }
+    } catch (e) {
+      return Response.json({ error: e }, { status: 500 });
+    }
   } else {
     return Response.json({ error: "invalid action" }, { status: 400 });
   }
