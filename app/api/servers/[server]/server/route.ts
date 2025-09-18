@@ -117,6 +117,7 @@ export async function PATCH(req: Request) {
     try {
       server.location = path.join(process.cwd(), "servers", server.name);
       if (fs.existsSync(server.location)) return Response.json({ error: "Server directory already exists" }, { status: 404 });
+      fs.mkdirSync(server.location, { recursive: true });
 
       const dataPath = path.join(process.cwd(), 'data', 'servers.json');
       if (fs.existsSync(dataPath)) {
