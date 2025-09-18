@@ -65,5 +65,5 @@ export async function GET() {
     ret = results.flat();
   }
 
-  return Response.json({ data: (ret.toString().replace(',','')) }, { status: 200 });
+  return Response.json({ data: (ret.toString().replaceAll(',','')) }, { status: 200 });
 }
