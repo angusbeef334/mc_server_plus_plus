@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { AnsiUp } from 'ansi_up';
+import { Server } from "@/lib/types";
 
 interface ServerViewProps {
   server: Server;
