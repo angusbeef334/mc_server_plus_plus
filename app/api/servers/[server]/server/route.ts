@@ -115,7 +115,8 @@ export async function PATCH(req: Request) {
     return Response.json({ message: "Props updated" }, { status: 200 });
   } else if (action === "add") {
     try {
-      if (!fs.existsSync(server.location)) return Response.json({ error: "Directory does not exist" }, { status: 404 });
+      server.location = path.join(process.cwd(), "servers", server.name);
+      if (fs.existsSync(server.location)) return Response.json({ error: "Server directory already exists" }, { status: 404 });
 
       const dataPath = path.join(process.cwd(), 'data', 'servers.json');
       if (fs.existsSync(dataPath)) {

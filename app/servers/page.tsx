@@ -49,12 +49,11 @@ export default function Server() {
     setAddErr('');
 
     const name = (document.getElementById('in-name') as HTMLInputElement).value;
-    const directory = (document.getElementById('in-dir') as HTMLInputElement).value;
     const version = (document.getElementById('in-version') as HTMLInputElement).value;
 
     const server = {
       "name": name,
-      "location": directory,
+      "location": "",
       "software": software,
       "version": version,
       "build": "0",
@@ -104,7 +103,6 @@ export default function Server() {
             <h2 className="text-lg sm:text-xl mb-4 text-white">Add Server</h2>
             <form onSubmit={handleSubmit} className="flex flex-col">
               <input type="text" id="in-name" className="bg-gray-700 m-1 p-2 rounded-md w-full" placeholder="Name" required/>
-              <input type="text" id="in-dir" className="bg-gray-700 m-1 p-2 rounded-md w-full" placeholder="Directory" required/>
               <select id="in-software" className="bg-gray-700 m-1 rounded-md w-full py-2 px-1" required onChange={(e) => {setVersions([]);setSoftware(e.target.value)}}>
                 <option value="paper">PaperMC</option>
                 <option value="spigot" disabled>Spigot</option>
