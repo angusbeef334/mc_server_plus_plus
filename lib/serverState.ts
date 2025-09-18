@@ -37,6 +37,14 @@ export function start(server: Server) {
   child.stderr?.on('data', (data) => {
     s.log += data;
   });
+  
+  child.on('error', async (err) => {
+    console.error(`Failed to start process: ${err}`);
+    s.log += `Failed to start process: ${err}`;
+    await new Promise(resolve => setTimeout(resolve, 2000)); // wait for last log to get sent
+    const instance = servers.find(s => s.key === key);
+    servers = servers.filter(s => s.key !== instance?.key);
+  });
 
   child.on('close', async (code) => {
     await new Promise(resolve => setTimeout(resolve, 2000)); // wait for last log to get sent
