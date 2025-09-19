@@ -120,16 +120,23 @@ export async function PATCH(req: Request) {
       fs.mkdirSync(server.location, { recursive: true });
 
       const dataPath = path.join(process.cwd(), 'data', 'servers.json');
-      if (fs.existsSync(dataPath)) {
-        const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
-        if (Array.isArray(data)) {
-          if (data.filter(s => s.name === server.name).length !== 0) return Response.json({ error: "Server already exists with same name" }, { status: 400 });
-          if (data.filter(s => s.location === server.location).length !== 0) return Response.json({ error: "Server already exists with same location" }, { status: 400 });
-          
-          data.push(server);
-          fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+      if (!fs.existsSync(dataPath)) {
+        try {
+          fs.writeFileSync(dataPath, '[]');
+        } catch {
+          return Response.json({ message: "servers.json does not exist and could not create" }, { status: 200 });
         }
       }
+
+      const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+      if (Array.isArray(data)) {
+        if (data.filter(s => s.name === server.name).length !== 0) return Response.json({ error: "Server already exists with same name" }, { status: 400 });
+        if (data.filter(s => s.location === server.location).length !== 0) return Response.json({ error: "Server already exists with same location" }, { status: 400 });
+        
+        data.push(server);
+        fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), "utf-8");
+      }
+
       return Response.json({ message: "Successfully added server " }, { status: 200 });
     } catch (e) {
       return Response.json({ error: "Failed to add server" }, { status: 500 });
