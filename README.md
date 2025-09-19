@@ -13,3 +13,14 @@ A next.js based webapp for managing Minecraft servers.
 * [Hangar](https://hangar.papermc.io/)
 * [Bukkit](https://dev.bukkit.org)
 * [Modrinth](https://modrinth.com)
+
+## Installation
+### Prerequisites
+Docker and docker-compose.
+
+### Deploy
+```
+$ git clone https://github.com/angusbeef334/mc_server_plus_plus
+$ cd mc_server_plus_plus
+$ docker-compose up --build -d
+```
