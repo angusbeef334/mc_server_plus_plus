@@ -24,3 +24,5 @@ $ git clone https://github.com/angusbeef334/mc_server_plus_plus
 $ cd mc_server_plus_plus
 $ docker-compose up --build -d
 ```
+
+Note: if your server will use ports other than 25565 and 25575, you will need to add them to the docker-compose.
