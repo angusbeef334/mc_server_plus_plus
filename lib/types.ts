@@ -13,4 +13,6 @@ export interface Server {
   build: string;
   plugins: Mod[];
   java: string;
+  min_mem?: string;
+  max_mem?: string;
 }

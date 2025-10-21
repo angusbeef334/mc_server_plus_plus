@@ -72,6 +72,19 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
     }
   }
 
+  const updateMem = async (min: string, max: string) => {
+    try {
+      const res = await fetch(`/api/servers/${server.name}/server`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ server, param: `${min} ${max}`, action: 'memory' })
+      });
+      if (!res.ok) alert(`failed to update memory allocation: ${res.statusText}`)
+    } catch(e: any) {
+      alert(`failed to update memory: ${e.error || 'unknown error'}`)
+    }
+  }
+
   const testJava = async (path: string) => {
     try {
       const res = await fetch('/api/java/test', {
@@ -354,6 +367,17 @@ export default function SettingsView({ serverData, onServerUpdate }: SettingsCar
                   Save
                 </button>
               </section>
+            </div>
+            <div className="flex flex-col">
+              <h2 className="text-lg sm:text-xl mb-4 text-white font-semibold">Memory allocation</h2>
+              <input className="bg-gray-700 m-1 p-2 rounded-md" type="number" id="in-memmin" placeholder="Min memory allocation (MB)"/>
+              <input className="bg-gray-700 m-1 p-2 rounded-md" type="number" id="in-memmax" placeholder="Max memory allocation (MB)"/>
+              <button
+                className="bg-blue-600 p-2 m-1 rounded-md w-min"
+                onClick={() => updateMem((document.getElementById('in-memmin') as HTMLInputElement).value, (document.getElementById('in-memmax') as HTMLInputElement).value)}
+              >
+                Save
+              </button>
             </div>
           </div>
         </div>
